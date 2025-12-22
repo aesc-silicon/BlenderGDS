@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 aesc-silicon
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # BlenderGDS
 
 A Blender add-on for importing GDSII layout files with full 3D layer stack visualization and PDK support.

@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2025 aesc silicon
 #
-# SPDX-License-Identifier: apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 
 bl_info = {
     "name": "GDSII Importer with PDK Support",
