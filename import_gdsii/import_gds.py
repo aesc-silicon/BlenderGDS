@@ -6,7 +6,7 @@ bl_info = {
     "name": "GDSII Importer with PDK Support",
     "author": "aesc silicon",
     "version": (1, 0, 0),
-    "blender": (3, 0, 0),
+    "blender": (3, 4, 0),
     "location": "File > Import",
     "description": "Import GDSII files with PDK layer stack support",
     "warning": "Requires gdstk and PyYAML packages",
@@ -19,14 +19,6 @@ from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
 import os
 from pathlib import Path
-
-import sys
-import site
-
-# Add user site-packages
-user_site = site.getusersitepackages()
-if user_site not in sys.path:
-    sys.path.append(user_site)
 
 # Try to import required packages
 try:
