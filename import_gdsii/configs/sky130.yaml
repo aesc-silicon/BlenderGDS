@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2025 aesc silicon
+#
+# SPDX-License-Identifier: Apache-2.0
+
+nwell:
+  index: 64
+  type: 20
+  z: -0.24
+  height: 0.14
+  color: [0.30, 0.50, 1.00, 0.8]
+diff:
+  index: 65
+  type: 20
+  z: -0.5
+  height: 0.6
+  color: [0.20, 0.80, 0.30, 0.8]
+poly:
+  index: 66
+  type: 20
+  z: 0
+  height: 0.2
+  color: [1.00, 0.30, 0.30, 0.9]
+licon:
+  index: 66
+  type: 44
+  z: 0
+  height: 0.94
+  color: [0.85, 0.60, 0.25, 1.0]
+li1:
+  index: 67
+  type: 20
+  z: 0.94
+  height: 0.1
+  color: [0.70, 0.35, 0.85, 1.0]
+mcon:
+  index: 67
+  type: 44
+  z: 1.04
+  height: 0.34
+  color: [0.90, 0.65, 0.20, 1.0]
+met1:
+  index: 68
+  type: 20
+  z: 1.38
+  height: 0.36
+  color: [0.45, 0.45, 0.50, 1.0]
+via:
+  index: 68
+  type: 44
+  z: 1.74
+  height: 0.27
+  color: [0.90, 0.70, 0.20, 1.0]
+met2:
+  index: 69
+  type: 20
+  z: 2.01
+  height: 0.36
+  color: [0.55, 0.55, 0.60, 1.0]
+via2:
+  index: 69
+  type: 44
+  z: 2.37
+  height: 0.42
+  color: [0.85, 0.65, 0.20, 1.0]
+met3:
+  index: 70
+  type: 20
+  z: 2.79
+  height: 0.85
+  color: [0.65, 0.65, 0.70, 1.0]
+via3:
+  index: 70
+  type: 44
+  z: 3.64
+  height: 0.39
+  color: [0.80, 0.60, 0.20, 1.0]
+met4:
+  index: 71
+  type: 20
+  z: 4.03
+  height: 0.85
+  color: [0.75, 0.75, 0.80, 1.0]
+via4:
+  index: 71
+  type: 44
+  z: 4.88
+  height: 0.50
+  color: [0.75, 0.55, 0.20, 1.0]
+met5:
+  index: 72
+  type: 20
+  z: 5.38
+  height: 1.26
+  color: [0.82, 0.82, 0.86, 1.0]
