@@ -32,14 +32,20 @@ BlenderGDS requires the following Python packages:
 * `numpy` - Numerical operations
 * `PyYAML` - Configuration file parsing
 
-Install these packages into Blender's module directory using pip:
+Check your installed Blender versions. If this directory doesn't exist, make sure you have started Blender at least once.
 
 ```bash
-pip install --target=${HOME}/.config/blender/3.4/scripts/addons/modules/ gdstk numpy pyyaml
+ls ~/.config/blender/
 ```
 
 > [!Note]
-> This guide is for Blender 3.4. If you're using a different version, adjust the path accordingly.
+> This guide is for Blender 5.0. If you're using a different version, adjust the path accordingly.
+
+Install these packages into Blender's module directory using pip:
+
+```bash
+pip install --target=$HOME/.config/blender/5.0/scripts/addons/modules/ gdstk numpy pyyaml
+```
 
 ### Installing the Add-on
 
@@ -49,10 +55,10 @@ pip install --target=${HOME}/.config/blender/3.4/scripts/addons/modules/ gdstk n
    git clone https://github.com/aesc-silicon/BlenderGDS
    ```
 
-2. Copy all files from `import_gdsii/` to `$HOME/.config/blender/3.4/scripts/addons/`
+2. Copy all files from `import_gdsii/` to `$HOME/.config/blender/5.0/scripts/addons/`
 
    ```bash
-   cp -r BlenderGDS/import_gdsii/ $HOME/.config/blender/3.4/scripts/addons/
+   cp -r BlenderGDS/import_gdsii/ $HOME/.config/blender/5.0/scripts/addons/
    ```
 
 3. Start Blender
