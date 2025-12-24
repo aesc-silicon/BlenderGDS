@@ -74,7 +74,13 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
     sun.energy = 3.0
 
     # Add soft shadows
-    bpy.context.scene.eevee.use_soft_shadows = True
+    if bpy.app.version < (4, 0, 0):
+        # Blender 3.x - use global setting
+        bpy.context.scene.eevee.use_soft_shadows = True
+    else:
+        # Blender 4.0+ - soft shadows are default in EEVEE Next
+        # Set shadow properties on the light instead
+        sun.use_shadow = True
 
     # --------------------------
     # SETUP CAMERA
@@ -106,7 +112,14 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
 
     # Assign material
     mat = bpy.data.materials.new(name="ChipBaseMat")
-    mat.diffuse_color = (0.05, 0.07, 0.1, 1)
+    if bpy.app.version >= (4, 0, 0):
+        mat.use_nodes = True
+        nodes = mat.node_tree.nodes
+        bsdf = nodes.get('Principled BSDF')
+        if bsdf:
+            bsdf.inputs['Base Color'].default_value = (0.05, 0.07, 0.1, 1)
+    else:
+        mat.diffuse_color = (0.05, 0.07, 0.1, 1)
     chip_base.data.materials.append(mat)
 
     print("✓ Chip scene setup complete!")
@@ -222,6 +235,7 @@ def create_extruded_layer(gds_path, z, height, layer, name, color, unit=1e-6, cr
         obj.data.materials.append(mat)
 
     print(f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
+    self.report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
     return obj
 
 
@@ -553,6 +567,8 @@ def register():
     if not DEPENDENCIES_OK:
         print(f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
         print("  Install with: pip install gdstk numpy pyyaml --break-system-packages")
+        self.report({'ERROR'}, f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
+        self.report({'ERROR'}, "  Install with: pip install gdstk numpy pyyaml --break-system-packages")
 
     register_properties()
 
