@@ -153,7 +153,7 @@ def create_material(name, color):
     return mat
 
 
-def create_extruded_layer(gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None):
+def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None):
     """Create extruded geometry for a specific GDS layer"""
     # Read and filter GDS
     library = gdstk.read_gds(gds_path, unit=unit, filter={layer})
@@ -235,7 +235,7 @@ def create_extruded_layer(gds_path, z, height, layer, name, color, unit=1e-6, cr
         obj.data.materials.append(mat)
 
     print(f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
-    self.report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
+    report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
     return obj
 
 
@@ -509,6 +509,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 layer_index = (data['index'], data['type'])
 
                 obj = create_extruded_layer(
+                    self.report,
                     filepath,
                     z,
                     height,
@@ -567,8 +568,6 @@ def register():
     if not DEPENDENCIES_OK:
         print(f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
         print("  Install with: pip install gdstk numpy pyyaml --break-system-packages")
-        self.report({'ERROR'}, f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
-        self.report({'ERROR'}, "  Install with: pip install gdstk numpy pyyaml --break-system-packages")
 
     register_properties()
 
