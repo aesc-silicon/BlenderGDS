@@ -45,6 +45,10 @@ PDK_CONFIGS = {
         'name': 'SkyWater SKY130 PDK',
         'config_path': 'configs/sky130.yaml',
     },
+    'GF180MCU': {
+        'name': 'GlobalFoundries GF180MCU PDK',
+        'config_path': 'configs/gf180mcu.yaml',
+    },
 }
 
 
@@ -277,6 +281,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
         items=[
             ('IHP_SG13G2', "IHP Open PDK SG13G2", "IHP SG13G2 130nm BiCMOS process"),
             ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
+            ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
         ],
         default='IHP_SG13G2',
     )
