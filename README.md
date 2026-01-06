@@ -131,6 +131,23 @@ Each layer requires:
 * `height`: Layer thickness in micrometers
 * `color`: Layer RGBA values
 
+## Scripts
+
+### merge.py
+
+Merges shapes on relevant BlenderGDS layers to ensure proper rendering with Cycles Render Engine. When using Cycles, overlapping edges and vertices between unmerged shapes can produce black artifacts in the rendered output.
+
+#### Usage
+```bash
+klayout -zz -r scripts/klayout/merge.py -rd pdk=ihp-sg13g2 -rd output_file=output.gds input.gds
+```
+
+#### Parameters
+
+- `pdk` - Process Design Kit specification (e.g., `ihp-sg13g2`)
+- `output_file` - Path for the merged output GDS file
+- `input.gds` - Input GDS file to process
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues on the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS).
