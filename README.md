@@ -22,6 +22,12 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 * **Custom Configurations**: Support for custom YAML layer stack configurations
 * **Flexible Scaling**: Adjustable unit and Z-axis scaling for different visualization needs
 
+## Supported PDKs
+
+* IHP Open PDK (SG13G2)
+* SkyWater SKY130 PDK
+* GlobalFoundries GF180MCU PDK
+
 ## Installation
 
 ### Prerequisites
