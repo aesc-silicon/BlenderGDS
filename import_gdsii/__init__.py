@@ -386,6 +386,13 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         default=False,
     )
 
+    # Add metal dummy fill
+    add_fill: BoolProperty(
+        name="Metal dumm fill",
+        description="Include metal dummy fill",
+        default=False,
+    )
+
     crop_x: FloatProperty(
         name="X",
         description="X coordinate of crop region (lower-left corner)",
@@ -426,6 +433,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box = layout.box()
         box.label(text="Scene Setup:", icon='SCENE_DATA')
         box.prop(self, "setup_scene")
+
+        # Add metal dummy fill
+        box = layout.box()
+        box.label(text="Metal Dummy Fill:", icon='SCENE_DATA')
+        box.prop(self, "add_fill")
 
         # Crop region
         box = layout.box()
@@ -525,6 +537,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 z = data['z'] * self.z_scale
                 height = data['height'] * self.z_scale
                 layer_index = (data['index'], data['type'])
+                if data.get('purpose', 'drawing') == 'filler' and not self.add_fill:
+                    continue
 
                 obj = create_extruded_layer(
                     self.report,
