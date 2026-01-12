@@ -23,6 +23,10 @@ install: install_pip
 	@cp -r ./import_gdsii $(HOME)/.config/blender/$(BLENDER_VERSION)/scripts/addons/
 	@echo "Add-on installed successfully."
 
+update:
+	@cp -r ./import_gdsii $(HOME)/.config/blender/$(BLENDER_VERSION)/scripts/addons/
+	@echo "Add-on updated successfully."
+
 remove:
 	@echo "Removing BlenderGDS add-on..."
 	@rm -rf $(HOME)/.config/blender/$(BLENDER_VERSION)/scripts/addons/import_gdsii
