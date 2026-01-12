@@ -38,38 +38,57 @@ BlenderGDS requires the following Python packages:
 * `numpy` - Numerical operations
 * `PyYAML` - Configuration file parsing
 
-Check your installed Blender versions. If this directory doesn't exist, make sure you have started Blender at least once.
+1. Check your installed Blender versions. If this directory doesn't exist, make sure you have started Blender at least once.
 
-```bash
-ls ~/.config/blender/
-```
+   ```bash
+   ls ~/.config/blender/
+   ```
 
-> [!Note]
-> This guide is for Blender 5.0. If you're using a different version, adjust the path accordingly.
-
-Install these packages into Blender's module directory using pip:
-
-```bash
-pip install --target=$HOME/.config/blender/5.0/scripts/addons/modules/ gdstk numpy pyyaml
-```
-
-### Installing the Add-on
-
-1. Download the latest release from the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS)
+2. Download the latest release from the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS)
 
    ```bash
    git clone https://github.com/aesc-silicon/BlenderGDS
+   cd BlenderGDS
    ```
 
-2. Copy all files from `import_gdsii/` to `$HOME/.config/blender/5.0/scripts/addons/`
+3. Install these packages into Blender's module directory using pip:
 
    ```bash
-   cp -r BlenderGDS/import_gdsii/ $HOME/.config/blender/5.0/scripts/addons/
+   make install_pip
    ```
 
-3. Start Blender
-4. In Blender, go to **Edit → Preferences → Add-ons**
-5. Enable the add-on by checking the box next to "Import-Export: GDSII Importer with PDK Support"
+> [!Note]
+> If Blender was installed via Steam, it can be found at `$HOME/.local/share/Steam/steamapps/common/Blender/`.
+> In this case, use:
+> ```bash
+> BLENDER_EXE=$HOME/.local/share/Steam/steamapps/common/Blender/blender make install_pip
+> ```
+
+### Installing the Add-on
+
+1. Copy all files from `import_gdsii/` to the Blender directory
+
+   ```bash
+   make install
+   ```
+
+2. Start Blender
+3. In Blender, go to **Edit → Preferences → Add-ons**
+4. Enable the add-on by checking the box next to "Import-Export: GDSII Importer with PDK Support"
+
+### Updating the Add-on
+
+1. Fetch the latest version of BlenderGDS
+
+   ```bash
+   git pull
+   ```
+
+2. Update all files from `import_gdsii/` to the Blender directory
+
+   ```bash
+   make update
+   ```
 
 ## Usage
 
