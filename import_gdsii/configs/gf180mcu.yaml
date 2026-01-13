@@ -7,88 +7,73 @@ Comp:
   type: 0
   z: -0.3  # Estimated value
   height: 0.25
-  color: [0.20, 0.80, 0.30, 0.8]
 Nwell:
   index: 21
   type: 0
   z: -0.3  # Estimated value
   height: 0.20
-  color: [0.30, 0.50, 1.00, 0.8]
 Poly2:
   index: 30
   type: 0
   z: -0.2
   height: 0.2
-  color: [1.00, 0.30, 0.30, 0.9]
 Contact:
   index: 33
   type: 0
   z: 0.0
   height: 0.7
-  color: [0.95, 0.75, 0.25, 1.0]
 Metal1:
   index: 34
   type: 0
   z: 0.7
   height: 0.55
-  color: [0.45, 0.45, 0.50, 1.0]
 Via1:
   index: 35
   type: 0
   z: 1.25
   height: 0.6
-  color: [0.90, 0.70, 0.20, 1.0]
 Metal2:
   index: 36
   type: 0
   z: 1.85
   height: 0.55
-  color: [0.55, 0.55, 0.60, 1.0]
 Via2:
   index: 38
   type: 0
   z: 2.4
   height: 0.9
-  color: [0.85, 0.65, 0.20, 1.0]
 Metal3:
   index: 42
   type: 0
   z: 3.3
   height: 0.55
-  color: [0.65, 0.65, 0.70, 1.0]
 Via3:
   index: 40
   type: 0
   z: 3.85
   height: 0.6
-  color: [0.80, 0.60, 0.20, 1.0]
 Metal4:
   index: 46
   type: 0
   z: 4.45
   height: 0.55
-  color: [0.75, 0.75, 0.80, 1.0]
 Via4:
   index: 41
   type: 0
   z: 5
   height: 0.6
-  color: [0.75, 0.55, 0.20, 1.0]
 Metal5:
   index: 81
   type: 0
   z: 5.6
   height: 0.55
-  color: [0.82, 0.82, 0.86, 1.0]
 Via5:
   index: 82
   type: 0
   z: 6.15
   height: 0.6
-  color: [0.70, 0.50, 0.20, 1.0]
 MetalTop:
   index: 53
   type: 0
   z: 6.75
   height: 0.69
-  color: [0.85, 0.88, 0.95, 1.0]

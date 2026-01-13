@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Marketing
+description: Marketing color scheme
+layers:
+  # Silicon / Devices (enhanced but plausible)
+  Activ:
+    color: [0.40, 0.55, 0.30, 0.90]
+  ActivFiller:
+    color: [0.40, 0.55, 0.30, 0.55]
+
+  GatPoly:
+    color: [0.22, 0.22, 0.20, 0.95]
+  GatPolyFiller:
+    color: [0.22, 0.22, 0.20, 0.60]
+
+  NWell:
+    color: [0.35, 0.55, 0.65, 0.55]
+
+  # Tungsten (dark contrast backbone)
+  Cont:
+    color: [0.35, 0.37, 0.40, 1.0]
+
+  Via1:
+    color: [0.38, 0.40, 0.43, 1.0]
+  Via2:
+    color: [0.40, 0.42, 0.45, 1.0]
+  Via3:
+    color: [0.42, 0.44, 0.47, 1.0]
+  Via4:
+    color: [0.44, 0.46, 0.49, 1.0]
+
+  TopVia1:
+    color: [0.46, 0.48, 0.51, 1.0]
+  TopVia2:
+    color: [0.48, 0.50, 0.53, 1.0]
+
+  # Aluminum stack (cool silver gradient with subtle warmth)
+  Metal1:
+    color: [0.61, 0.62, 0.64, 1.0]
+  Metal1Filler:
+    color: [0.61, 0.62, 0.64, 0.65]
+
+  Metal2:
+    color: [0.67, 0.68, 0.70, 1.0]
+  Metal2Filler:
+    color: [0.67, 0.68, 0.70, 0.65]
+
+  Metal3:
+    color: [0.73, 0.74, 0.76, 1.0]
+  Metal3Filler:
+    color: [0.73, 0.74, 0.76, 0.65]
+
+  Metal4:
+    color: [0.79, 0.80, 0.82, 1.0]
+  Metal4Filler:
+    color: [0.79, 0.80, 0.82, 0.65]
+
+  Metal5:
+    color: [0.84, 0.85, 0.87, 1.0]
+  Metal5Filler:
+    color: [0.84, 0.85, 0.87, 0.65]
+
+  # Hero layers (bright, premium aluminum)
+  TopMetal1:
+    color: [0.89, 0.90, 0.92, 1.0]
+  TopMetal1Filler:
+    color: [0.89, 0.90, 0.92, 0.70]
+
+  TopMetal2:
+    color: [0.93, 0.94, 0.96, 1.0]
+  TopMetal2Filler:
+    color: [0.93, 0.94, 0.96, 0.70]

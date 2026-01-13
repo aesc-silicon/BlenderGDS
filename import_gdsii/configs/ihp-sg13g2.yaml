@@ -7,163 +7,137 @@ Activ:
   type: 0
   z: -0.4
   height: 0.35
-  color: [0.20, 0.80, 0.30, 0.8]
 ActivFiller:
   index: 1
   type: 22
   purpose: filler
   z: -0.4
   height: 0.35
-  color: [0.20, 0.80, 0.30, 0.8]
 GatPoly:
   index: 5
   type: 0
   z: -0.4
   height: 0.40
-  color: [1.00, 0.30, 0.30, 0.9]
 GatPolyFiller:
   index: 5
   type: 22
   purpose: filler
   z: -0.4
   height: 0.40
-  color: [1.00, 0.30, 0.30, 0.9]
 NWell:
   index: 31
   type: 0
   z: -0.4
   height: 0.30
-  color: [0.30, 0.50, 1.00, 0.8]
 Cont:
   index: 6
   type: 0
   z: 0.00
   height: 0.64
-  color: [0.95, 0.75, 0.25, 1.0]
 Metal1:
   index: 8
   type: 0
   z: 0.640
   height: 0.40
-  color: [0.45, 0.45, 0.50, 1.0]
 Metal1Filler:
   index: 8
   type: 22
   purpose: filler
   z: 0.640
   height: 0.40
-  color: [0.45, 0.45, 0.50, 1.0]
 Via1:
   index: 19
   type: 0
   z: 1.06
   height: 0.54
-  color: [0.90, 0.70, 0.20, 1.0]
 Metal2:
   index: 10
   type: 0
   z: 1.600
   height: 0.49
-  color: [0.55, 0.55, 0.60, 1.0]
 Metal2Filler:
   index: 10
   type: 22
   purpose: filler
   z: 1.600
   height: 0.49
-  color: [0.55, 0.55, 0.60, 1.0]
 Via2:
   index: 29
   type: 0
   z: 2.09
   height: 0.54
-  color: [0.85, 0.65, 0.20, 1.0]
 Metal3:
   index: 30
   type: 0
   z: 2.63
   height: 0.49
-  color: [0.65, 0.65, 0.70, 1.0]
 Metal3Filler:
   index: 30
   type: 22
   purpose: filler
   z: 2.63
   height: 0.49
-  color: [0.65, 0.65, 0.70, 1.0]
 Via3:
   index: 49
   type: 0
   z: 3.12
   height: 0.54
-  color: [0.80, 0.60, 0.20, 1.0]
 Metal4:
   index: 50
   type: 0
   z: 3.66
   height: 0.49
-  color: [0.75, 0.75, 0.80, 1.0]
 Metal4Filler:
   index: 50
   type: 22
   purpose: filler
   z: 3.66
   height: 0.49
-  color: [0.75, 0.75, 0.80, 1.0]
 Via4:
   index: 66
   type: 0
   z: 4.15
   height: 0.54
-  color: [0.75, 0.55, 0.20, 1.0]
 Metal5:
   index: 67
   type: 0
   z: 4.69
   height: 0.49
-  color: [0.82, 0.82, 0.86, 1.0]
 Metal5Filler:
   index: 67
   type: 22
   purpose: filler
   z: 4.69
   height: 0.49
-  color: [0.82, 0.82, 0.86, 1.0]
 TopVia1:
   index: 125
   type: 0
   z: 5.18
   height: 0.85
-  color: [0.70, 0.50, 0.20, 1.0]
 TopMetal1:
   index: 126
   type: 0
   z: 6.03
   height: 2.00
-  color: [0.85, 0.88, 0.95, 1.0]
 TopMetal1Filler:
   index: 126
   type: 22
   purpose: filler
   z: 6.03
   height: 2.00
-  color: [0.85, 0.88, 0.95, 1.0]
 TopVia2:
   index: 133
   type: 0
   z: 8.03
   height: 2.80
-  color: [0.65, 0.45, 0.20, 1.0]
 TopMetal2:
   index: 134
   type: 0
   z: 10.83
   height: 3.00
-  color: [0.90, 0.93, 1.00, 1.0]
 TopMetal2Filler:
   index: 134
   type: 22
   purpose: filler
   z: 10.83
   height: 3.00
-  color: [0.90, 0.93, 1.00, 1.0]

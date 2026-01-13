@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Fancy
+description: Fancy color scheme - premium tech aesthetic
+layers:
+  # Silicon layers (sophisticated tech colors)
+  Comp:
+    color: [0.15, 0.75, 0.70, 0.90]
+  Nwell:
+    color: [0.85, 0.65, 0.30, 0.60]
+  Poly2:
+    color: [0.45, 0.25, 0.75, 0.95]
+
+  # Copper/bronze vias (graduated warm metallics)
+  Contact:
+    color: [0.90, 0.55, 0.40, 1.0]
+  Via1:
+    color: [0.85, 0.50, 0.35, 1.0]
+  Via2:
+    color: [0.80, 0.52, 0.38, 1.0]
+  Via3:
+    color: [0.75, 0.54, 0.40, 1.0]
+  Via4:
+    color: [0.70, 0.56, 0.42, 1.0]
+  Via5:
+    color: [0.82, 0.60, 0.45, 1.0]
+
+  # Metal layers (cool blue gradient - sleek, modern)
+  Metal1:
+    color: [0.30, 0.50, 0.75, 1.0]
+  Metal2:
+    color: [0.35, 0.55, 0.80, 1.0]
+  Metal3:
+    color: [0.40, 0.60, 0.85, 1.0]
+  Metal4:
+    color: [0.50, 0.68, 0.90, 1.0]
+  Metal5:
+    color: [0.60, 0.75, 0.95, 1.0]
+  MetalTop:
+    color: [0.85, 0.95, 1.00, 1.0]
