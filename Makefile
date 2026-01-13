@@ -24,6 +24,7 @@ install: install_pip
 	@echo "Add-on installed successfully."
 
 update:
+	@rm -r $(HOME)/.config/blender/$(BLENDER_VERSION)/scripts/addons/import_gdsii/*
 	@cp -r ./import_gdsii $(HOME)/.config/blender/$(BLENDER_VERSION)/scripts/addons/
 	@echo "Add-on updated successfully."
 
