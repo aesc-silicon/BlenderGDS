@@ -40,14 +40,17 @@ PDK_CONFIGS = {
     'IHP_SG13G2': {
         'name': 'IHP Open PDK (SG13G2)',
         'config_path': 'configs/ihp-sg13g2.yaml',
+        'color_path': 'configs/colors/ihp-sg13g2/'
     },
     'SKY130': {
         'name': 'SkyWater SKY130 PDK',
         'config_path': 'configs/sky130.yaml',
+        'color_path': 'configs/colors/sky130/'
     },
     'GF180MCU': {
         'name': 'GlobalFoundries GF180MCU PDK',
         'config_path': 'configs/gf180mcu.yaml',
+        'color_path': 'configs/colors/gf180mcu/'
     },
 }
 
@@ -269,6 +272,24 @@ def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=
 # PRE-IMPORT PDK SELECTION DIALOG
 # ============================================================================
 
+def get_color_schemes(self, context):
+    """Dynamically generate color scheme list based on selected PDK"""
+    items = []
+
+    pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+    addon_dir = Path(__file__).parent
+    color_path = addon_dir / PDK_CONFIGS.get(pdk, {}).get('color_path', pdk)
+    schemes = [('realistic', 'Realistic', 'Realistic color scheme')]
+    for file in color_path.glob('*yaml'):
+        # Make sure realistic is the default choice
+        if file.stem == 'realistic':
+            continue
+        color_file = yaml.safe_load(file.read_text(encoding='utf-8'))
+        schemes.append((file.stem, color_file.get('name', file.stem),
+                       color_file.get('description', file.stem)))
+    return schemes
+
+
 class GDSIIPreImportDialog(bpy.types.Operator):
     """Select PDK before importing GDSII file"""
     bl_idname = "import_scene.gdsii_pdk_dialog"
@@ -388,6 +409,13 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         default=True,
     )
 
+    # Color schemes
+    color_scheme: EnumProperty(
+        name="Color Scheme",
+        description="Select color scheme for the PDK",
+        items=get_color_schemes
+    )
+
     # Crop region options
     use_crop: BoolProperty(
         name="Crop to Region",
@@ -442,6 +470,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box = layout.box()
         box.label(text="Scene Setup:", icon='SCENE_DATA')
         box.prop(self, "setup_scene")
+
+        # Color scheme
+        box = layout.box()
+        box.label(text="Color Scheme:", icon='SCENE_DATA')
+        box.prop(self, "color_scheme")
 
         # Add metal dummy fill
         box = layout.box()
@@ -536,6 +569,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             if self.setup_scene:
                 setup_chip_scene(chip_width, chip_height, collection)
 
+            addon_dir = Path(__file__).parent
+            colorfile = addon_dir / pdk_info.get('color_path', 'configs/colors/ihp-sg13g2') / f"{self.color_scheme}.yaml"
+            color_file = yaml.safe_load(colorfile.read_text(encoding='utf-8'))
+
             print(f"Starting GDS import from: {filepath}")
             print(f"Using PDK: {pdk_selection}")
             print(f"Layer stack config: {yamlfile}")
@@ -549,6 +586,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 if data.get('purpose', 'drawing') == 'filler' and not self.add_fill:
                     continue
 
+                layer_cfg = color_file.get('layers', {}).get(layer_name, {})
+                color = layer_cfg.get('color', [1.0, 1.0, 1.0, 1.0])
                 obj = create_extruded_layer(
                     self.report,
                     filepath,
@@ -556,7 +595,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     height,
                     layer_index,
                     layer_name,
-                    data['color'],
+                    color,
                     unit=self.unit_scale,
                     crop_box=crop_box
                 )
