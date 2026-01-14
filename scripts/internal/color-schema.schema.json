@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Color Scheme",
+  "description": "Schema for validating color scheme YAML files for GDSII layer visualization",
+  "type": "object",
+  "required": ["name", "description", "layers"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the color scheme"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the color scheme"
+    },
+    "layers": {
+      "type": "object",
+      "description": "Layer definitions with colors",
+      "patternProperties": {
+        "^[A-Za-z0-9_]+$": {
+          "type": "object",
+          "required": ["color"],
+          "properties": {
+            "color": {
+              "type": "array",
+              "description": "RGBA color values (red, green, blue, alpha) ranging from 0.0 to 1.0",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

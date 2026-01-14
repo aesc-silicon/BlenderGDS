@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Layer Configuration",
+  "description": "Schema for validating layer configuration YAML files with index, type, z-position, and height",
+  "type": "object",
+  "patternProperties": {
+    "^[A-Za-z0-9_]+$": {
+      "type": "object",
+      "required": ["index", "type", "z", "height"],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "description": "Layer index number",
+          "minimum": 0
+        },
+        "type": {
+          "type": "integer",
+          "description": "Layer type/datatype",
+          "minimum": 0
+        },
+        "z": {
+          "type": "number",
+          "description": "Z-position of the layer (vertical position in 3D space)"
+        },
+        "height": {
+          "type": "number",
+          "description": "Height/thickness of the layer",
+          "minimum": 0
+        },
+        "purpose": {
+          "type": "string",
+          "enum": ["filler"],
+          "description": "Purpose of this layer"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
