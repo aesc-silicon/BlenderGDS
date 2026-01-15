@@ -16,27 +16,45 @@ layers:
   # Copper/bronze vias (graduated warm metallics)
   Contact:
     color: [0.90, 0.55, 0.40, 1.0]
+    metallic: 0.8
   Via1:
     color: [0.85, 0.50, 0.35, 1.0]
+    metallic: 0.8
   Via2:
     color: [0.80, 0.52, 0.38, 1.0]
+    metallic: 0.8
   Via3:
     color: [0.75, 0.54, 0.40, 1.0]
+    metallic: 0.8
   Via4:
     color: [0.70, 0.56, 0.42, 1.0]
+    metallic: 0.8
   Via5:
     color: [0.82, 0.60, 0.45, 1.0]
+    metallic: 0.8
 
   # Metal layers (cool blue gradient - sleek, modern)
   Metal1:
     color: [0.30, 0.50, 0.75, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal2:
     color: [0.35, 0.55, 0.80, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal3:
     color: [0.40, 0.60, 0.85, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal4:
     color: [0.50, 0.68, 0.90, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal5:
     color: [0.60, 0.75, 0.95, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   MetalTop:
     color: [0.85, 0.95, 1.00, 1.0]
+    metallic: 0.8
+    roughness: 0.3

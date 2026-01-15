@@ -24,55 +24,90 @@ layers:
   # Contacts - bright copper/rose gold
   Cont:
     color: [0.90, 0.55, 0.40, 1.0]
+    metallic: 0.8
 
   # Vias - graduated warm metallics (copper to bronze)
   Via1:
     color: [0.85, 0.50, 0.35, 1.0]
+    metallic: 0.8
   Via2:
     color: [0.80, 0.52, 0.38, 1.0]
+    metallic: 0.8
   Via3:
     color: [0.75, 0.54, 0.40, 1.0]
+    metallic: 0.8
   Via4:
     color: [0.70, 0.56, 0.42, 1.0]
+    metallic: 0.8
 
   TopVia1:
     color: [0.82, 0.60, 0.45, 1.0]
+    metallic: 0.8
   TopVia2:
     color: [0.88, 0.65, 0.48, 1.0]
+    metallic: 0.8
 
   # Metal layers - cool blue gradient (sleek, modern)
   Metal1:
     color: [0.30, 0.50, 0.75, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal1Filler:
     color: [0.30, 0.50, 0.75, 0.65]
+    metallic: 0.8
+    roughness: 0.3
 
   Metal2:
     color: [0.35, 0.55, 0.80, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal2Filler:
     color: [0.35, 0.55, 0.80, 0.65]
+    metallic: 0.8
+    roughness: 0.3
 
   Metal3:
     color: [0.40, 0.60, 0.85, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal3Filler:
     color: [0.40, 0.60, 0.85, 0.65]
+    metallic: 0.8
+    roughness: 0.3
 
   Metal4:
     color: [0.50, 0.68, 0.90, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal4Filler:
     color: [0.50, 0.68, 0.90, 0.65]
+    metallic: 0.8
+    roughness: 0.3
 
   Metal5:
     color: [0.60, 0.75, 0.95, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   Metal5Filler:
     color: [0.60, 0.75, 0.95, 0.65]
+    metallic: 0.8
+    roughness: 0.3
 
   # Top metals - bright cyan to white (hero layers)
   TopMetal1:
     color: [0.70, 0.85, 1.00, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   TopMetal1Filler:
     color: [0.70, 0.85, 1.00, 0.70]
+    metallic: 0.8
+    roughness: 0.3
 
   TopMetal2:
     color: [0.85, 0.95, 1.00, 1.0]
+    metallic: 0.8
+    roughness: 0.3
   TopMetal2Filler:
     color: [0.85, 0.95, 1.00, 0.70]
+    metallic: 0.8
+    roughness: 0.3
