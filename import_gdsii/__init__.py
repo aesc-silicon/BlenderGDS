@@ -154,14 +154,14 @@ def create_material(name, color):
     node_output = nodes.new(type='ShaderNodeOutputMaterial')
 
     # Set color and properties
-    node_bsdf.inputs['Base Color'].default_value = color
-    node_bsdf.inputs['Metallic'].default_value = 0.8 if 'Metal' in name or 'Via' in name or 'Cont' in name else 0.1
-    node_bsdf.inputs['Roughness'].default_value = 0.3 if 'Metal' in name else 0.5
+    node_bsdf.inputs['Base Color'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])
+    node_bsdf.inputs['Metallic'].default_value = color.get('metallic', 0.1)
+    node_bsdf.inputs['Roughness'].default_value = color.get('roughness', 0.5)
 
     # Add emission strength when Cycles render engine can't compute face
     if 'Emission Strength' in node_bsdf.inputs:
         node_bsdf.inputs['Emission Strength'].default_value = 0.025
-        node_bsdf.inputs['Emission Color'].default_value = color
+        node_bsdf.inputs['Emission Color'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])
 
     # Ensure alpha is set to 1.0 (fully opaque)
     if 'Alpha' in node_bsdf.inputs:
@@ -587,7 +587,6 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     continue
 
                 layer_cfg = color_file.get('layers', {}).get(layer_name, {})
-                color = layer_cfg.get('color', [1.0, 1.0, 1.0, 1.0])
                 obj = create_extruded_layer(
                     self.report,
                     filepath,
@@ -595,7 +594,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     height,
                     layer_index,
                     layer_name,
-                    color,
+                    layer_cfg,
                     unit=self.unit_scale,
                     crop_box=crop_box
                 )

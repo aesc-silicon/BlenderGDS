@@ -31,6 +31,18 @@
                 "minimum": 0.0,
                 "maximum": 1.0
               }
+            },
+            "metallic": {
+              "type": "number",
+              "description": "Metallic property for PBR rendering (0.0 = non-metallic, 1.0 = fully metallic)",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "roughness": {
+              "type": "number",
+              "description": "Roughness property for PBR rendering (0.0 = smooth/glossy, 1.0 = rough/matte)",
+              "minimum": 0.0,
+              "maximum": 1.0
             }
           },
           "additionalProperties": false
