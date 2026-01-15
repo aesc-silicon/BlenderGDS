@@ -5,30 +5,30 @@
 Activ:
   index: 1
   type: 0
-  z: -0.4
-  height: 0.35
+  z: -0.3995
+  height: 0.40
 ActivFiller:
   index: 1
   type: 22
   purpose: filler
-  z: -0.4
-  height: 0.35
+  z: -0.3995
+  height: 0.40
 GatPoly:
   index: 5
   type: 0
-  z: -0.4
+  z: -0.399
   height: 0.40
 GatPolyFiller:
   index: 5
   type: 22
   purpose: filler
-  z: -0.4
+  z: -0.399
   height: 0.40
 NWell:
   index: 31
   type: 0
   z: -0.4
-  height: 0.30
+  height: 0.40
 Cont:
   index: 6
   type: 0
