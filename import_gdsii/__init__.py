@@ -158,26 +158,12 @@ def create_material(name, color):
     node_bsdf.inputs['Metallic'].default_value = color.get('metallic', 0.1)
     node_bsdf.inputs['Roughness'].default_value = color.get('roughness', 0.5)
 
-    # Add emission strength when Cycles render engine can't compute face
-    if 'Emission Strength' in node_bsdf.inputs:
-        node_bsdf.inputs['Emission Strength'].default_value = 0.025
-        node_bsdf.inputs['Emission Color'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])
-
     # Ensure alpha is set to 1.0 (fully opaque)
     if 'Alpha' in node_bsdf.inputs:
         node_bsdf.inputs['Alpha'].default_value = 1.0
 
-    # For Cycles, ensure specular is set properly (helps with black materials)
-    if 'Specular IOR Level' in node_bsdf.inputs:  # Blender 4.0+
-        node_bsdf.inputs['Specular IOR Level'].default_value = 0.5
-    elif 'Specular' in node_bsdf.inputs:  # Blender 3.x
-        node_bsdf.inputs['Specular'].default_value = 0.5
-
     # Link nodes
     mat.node_tree.links.new(node_bsdf.outputs['BSDF'], node_output.inputs['Surface'])
-
-    # Set blend mode and shadow mode for proper Cycles rendering
-    mat.blend_method = 'OPAQUE'
 
     return mat
 
