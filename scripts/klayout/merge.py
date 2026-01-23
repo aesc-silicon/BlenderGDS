@@ -39,8 +39,6 @@ merged_top_cell = merged_layout.create_cell(f"{top_cell.name}_merged")
 
 config = (configs / f"{pdk}.yaml").read_text(encoding="utf-8")
 for name, data in yaml.safe_load(config).items():
-    if data.get('purpose', 'drawing') == 'filler':
-        continue
     layer = (data['index'], data['type'])
     drawing = pya.Region(top_cell.begin_shapes_rec(layout.layer(layer)))
     merged_top_cell.shapes(merged_layout.layer(layer)).insert(drawing.merged())
