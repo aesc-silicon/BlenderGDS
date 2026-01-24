@@ -158,9 +158,8 @@ def create_material(name, color):
     node_bsdf.inputs['Metallic'].default_value = color.get('metallic', 0.1)
     node_bsdf.inputs['Roughness'].default_value = color.get('roughness', 0.5)
 
-    # Ensure alpha is set to 1.0 (fully opaque)
     if 'Alpha' in node_bsdf.inputs:
-        node_bsdf.inputs['Alpha'].default_value = 1.0
+        node_bsdf.inputs['Alpha'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])[-1]
 
     # Link nodes
     mat.node_tree.links.new(node_bsdf.outputs['BSDF'], node_output.inputs['Surface'])
