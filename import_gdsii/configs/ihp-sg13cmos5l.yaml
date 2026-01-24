@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: Apache-2.0
+
+Activ:
+  index: 1
+  type: 0
+  z: -0.3995
+  height: 0.40
+ActivFiller:
+  index: 1
+  type: 22
+  purpose: filler
+  z: -0.3995
+  height: 0.40
+GatPoly:
+  index: 5
+  type: 0
+  z: -0.399
+  height: 0.40
+GatPolyFiller:
+  index: 5
+  type: 22
+  purpose: filler
+  z: -0.399
+  height: 0.40
+NWell:
+  index: 31
+  type: 0
+  z: -0.4
+  height: 0.40
+Cont:
+  index: 6
+  type: 0
+  z: 0.00
+  height: 0.64
+Metal1:
+  index: 8
+  type: 0
+  z: 0.640
+  height: 0.40
+Metal1Filler:
+  index: 8
+  type: 22
+  purpose: filler
+  z: 0.640
+  height: 0.40
+Via1:
+  index: 19
+  type: 0
+  z: 1.06
+  height: 0.54
+Metal2:
+  index: 10
+  type: 0
+  z: 1.600
+  height: 0.49
+Metal2Filler:
+  index: 10
+  type: 22
+  purpose: filler
+  z: 1.600
+  height: 0.49
+Via2:
+  index: 29
+  type: 0
+  z: 2.09
+  height: 0.54
+Metal3:
+  index: 30
+  type: 0
+  z: 2.63
+  height: 0.49
+Metal3Filler:
+  index: 30
+  type: 22
+  purpose: filler
+  z: 2.63
+  height: 0.49
+Via3:
+  index: 49
+  type: 0
+  z: 3.12
+  height: 0.54
+Metal4:
+  index: 50
+  type: 0
+  z: 3.66
+  height: 0.49
+Metal4Filler:
+  index: 50
+  type: 22
+  purpose: filler
+  z: 3.66
+  height: 0.49
+TopVia1:
+  index: 125
+  type: 0
+  z: 4.15
+  height: 0.85
+TopMetal1:
+  index: 126
+  type: 0
+  z: 5.00
+  height: 2.00
+TopMetal1Filler:
+  index: 126
+  type: 22
+  purpose: filler
+  z: 5.00
+  height: 2.00

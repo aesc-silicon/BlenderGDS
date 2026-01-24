@@ -42,6 +42,11 @@ PDK_CONFIGS = {
         'config_path': 'configs/ihp-sg13g2.yaml',
         'color_path': 'configs/colors/ihp-sg13g2/'
     },
+    'IHP_SG13CMOS5L': {
+        'name': 'IHP Open PDK (SG13CMOS5L)',
+        'config_path': 'configs/ihp-sg13cmos5l.yaml',
+        'color_path': 'configs/colors/ihp-sg13cmos5l/'
+    },
     'SKY130': {
         'name': 'SkyWater SKY130 PDK',
         'config_path': 'configs/sky130.yaml',
@@ -286,6 +291,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
         description="Process Design Kit to use for layer stack",
         items=[
             ('IHP_SG13G2', "IHP Open PDK SG13G2", "IHP SG13G2 130nm BiCMOS process"),
+            ('IHP_SG13CMOS5L', "IHP Open PDK SG13CMOS5L", "IHP SG13CMOS5L 130nm CMOS5L process"),
             ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
             ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
         ],
