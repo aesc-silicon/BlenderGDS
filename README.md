@@ -24,7 +24,7 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 
 ## Supported PDKs
 
-* IHP Open PDK (SG13G2)
+* IHP Open PDK (SG13G2 & CMOS5L)
 * SkyWater SKY130 PDK
 * GlobalFoundries GF180MCU PDK
 
