@@ -198,7 +198,7 @@ def create_material(name, color):
     return mat
 
 
-def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None):
+def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None, offset=None):
     """Create extruded geometry for a specific GDS layer"""
     # Read and filter GDS
     library = gdstk.read_gds(gds_path, unit=unit, filter={layer})
@@ -243,6 +243,8 @@ def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=
 
     for polygon in merged_cell.polygons:
         points = polygon.points
+        if offset is not None:
+            points = points - np.array(offset)
         n = len(points)
 
         if n < 3:
@@ -550,6 +552,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 
             # Setup crop box if enabled
             crop_box = None
+            crop_offset = None
             if self.use_crop:
                 # Convert to GDS units (typically micrometers)
                 crop_box = (
@@ -558,6 +561,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     self.crop_x + self.crop_width,
                     self.crop_y + self.crop_height
                 )
+                crop_offset = (self.crop_x, self.crop_y)
                 chip_width = self.crop_width
                 chip_height = self.crop_height
                 print(f"Cropping to region: X={self.crop_x}, Y={self.crop_y}, W={self.crop_width}, H={self.crop_height}")
@@ -613,7 +617,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     layer_name,
                     layer_cfg,
                     unit=self.unit_scale,
-                    crop_box=crop_box
+                    crop_box=crop_box,
+                    offset=crop_offset
                 )
 
                 if obj is not None:
