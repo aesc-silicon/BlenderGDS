@@ -70,6 +70,32 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
     target_collection = collection if collection is not None else bpy.context.collection
 
     # --------------------------
+    # RENDER ENGINE: CYCLES + GPU
+    # --------------------------
+    bpy.context.scene.render.engine = 'CYCLES'
+
+    cycles_prefs = bpy.context.preferences.addons['cycles'].preferences
+    gpu_activated = False
+    for backend in ('OPTIX', 'CUDA', 'HIP', 'METAL', 'ONEAPI'):
+        try:
+            cycles_prefs.compute_device_type = backend
+            cycles_prefs.get_devices()
+            devices = [d for d in cycles_prefs.devices if d.type != 'CPU']
+            if devices:
+                for d in cycles_prefs.devices:
+                    d.use = True
+                bpy.context.scene.cycles.device = 'GPU'
+                gpu_activated = True
+                print(f"✓ Cycles GPU: {backend} ({len(devices)} device(s))")
+                break
+        except Exception:
+            continue
+
+    if not gpu_activated:
+        bpy.context.scene.cycles.device = 'CPU'
+        print("⚠ Cycles GPU: no compatible device found, falling back to CPU")
+
+    # --------------------------
     # SETUP WORLD
     # --------------------------
     world = bpy.data.worlds.new("ChipWorld")
