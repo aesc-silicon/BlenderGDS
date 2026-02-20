@@ -144,10 +144,10 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
     target_collection.objects.link(chip_base)
 
     # Define vertices for a plane of correct size
-    verts = [(0, 0, -0.005),
-             (0, chip_y, -0.005),
-             (chip_x, chip_y, -0.005),
-             (chip_x, 0, -0.005)]
+    verts = [(0, 0, -1),
+             (0, chip_y, -1),
+             (chip_x, chip_y, -1),
+             (chip_x, 0, -1)]
     faces = [(0, 1, 2, 3)]
     mesh.from_pydata(verts, [], faces)
     mesh.update()
