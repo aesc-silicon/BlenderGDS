@@ -18,11 +18,13 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
 import os
+import tempfile
 from pathlib import Path
 
 # Try to import required packages
 try:
     import gdstk
+    import klayout.db as db
     import numpy as np
     import yaml
     DEPENDENCIES_OK = True
@@ -196,6 +198,27 @@ def create_material(name, color):
     mat.node_tree.links.new(node_bsdf.outputs['BSDF'], node_output.inputs['Surface'])
 
     return mat
+
+
+def _create_merged_gds(gds_path, layerstack, tmp_dir):
+    """Merge all layers with KLayout and write the result to a GDS in tmp_dir."""
+    layout = db.Layout()
+    layout.read(str(gds_path))
+    top_cell = layout.top_cell()
+
+    merged_layout = db.Layout()
+    merged_layout.dbu = layout.dbu
+    merged_top_cell = merged_layout.create_cell(top_cell.name)
+
+    for data in layerstack.values():
+        layer = (data['index'], data['type'])
+        layer_index = layout.layer(*layer)
+        region = db.Region(top_cell.begin_shapes_rec(layer_index))
+        merged_top_cell.shapes(merged_layout.layer(*layer)).insert(region.merged())
+
+    merged_path = Path(tmp_dir) / "merged.gds"
+    merged_layout.write(str(merged_path))
+    return merged_path
 
 
 def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None, offset=None):
@@ -442,6 +465,13 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         default=False,
     )
 
+    # Merge overlapping shapes per layer
+    merge_layers: BoolProperty(
+        name="Merge Layers",
+        description="Merge overlapping shapes on each layer to avoid Cycles rendering artifacts",
+        default=True,
+    )
+
     # Add metal dummy fill
     add_fill: BoolProperty(
         name="Metal dumm fill",
@@ -484,6 +514,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box.prop(self, "unit_scale")
         box.prop(self, "z_scale")
         box.prop(self, "create_collection")
+        box.prop(self, "merge_layers")
 
         # Scene setup
         box = layout.box()
@@ -598,6 +629,14 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             print(f"Using PDK: {pdk_selection}")
             print(f"Layer stack config: {yamlfile}")
 
+            # Merge layers upfront with KLayout if requested
+            tmp_dir = None
+            gds_path = filepath
+            if self.merge_layers:
+                tmp_dir = tempfile.mkdtemp()
+                gds_path = str(_create_merged_gds(filepath, layerstack, tmp_dir))
+                print(f"Merged GDS written to: {gds_path}")
+
             # Import each layer from the stack
             imported_count = 0
             for layer_name, data in layerstack.items():
@@ -610,7 +649,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 layer_cfg = color_file.get('layers', {}).get(layer_name, {})
                 obj = create_extruded_layer(
                     self.report,
-                    filepath,
+                    gds_path,
                     z,
                     height,
                     layer_index,
@@ -618,11 +657,15 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     layer_cfg,
                     unit=self.unit_scale,
                     crop_box=crop_box,
-                    offset=crop_offset
+                    offset=crop_offset,
                 )
 
                 if obj is not None:
                     imported_count += 1
+
+            if tmp_dir:
+                import shutil
+                shutil.rmtree(tmp_dir, ignore_errors=True)
 
             self.report({'INFO'}, f"Imported {imported_count} layers from {Path(filepath).name}")
             print(f"✓ Import complete! {imported_count} layers imported.")

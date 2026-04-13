@@ -21,6 +21,7 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 * **Collection Organization**: Automatic grouping of imported layers into named collections
 * **Custom Configurations**: Support for custom YAML layer stack configurations
 * **Flexible Scaling**: Adjustable unit and Z-axis scaling for different visualization needs
+* **Merge Layers**: Union overlapping shapes on each layer before building the mesh (enabled by default, eliminates black rendering artifacts in Cycles)
 
 ## Supported PDKs
 
@@ -149,17 +150,6 @@ Each layer requires:
 * `z`: Z-position in micrometers
 * `height`: Layer thickness in micrometers
 * `color`: Layer RGBA values
-
-## Scripts
-
-### merge.py
-
-Merges shapes on relevant BlenderGDS layers to ensure proper rendering with Cycles Render Engine. When using Cycles, overlapping edges and vertices between unmerged shapes can produce black artifacts in the rendered output.
-
-#### Usage
-```bash
-klayout -zz -r scripts/klayout/merge.py -rd pdk=ihp-sg13g2 -rd output_file=output.gds input.gds
-```
 
 #### Parameters
 
