@@ -31,66 +31,48 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 
 ## Installation
 
-### Prerequisites
+BlenderGDS requires **Blender 4.2 or later**. All Python dependencies (`gdstk`, `klayout`, `numpy`, `PyYAML`) are bundled inside the extension and installed automatically — no pip or terminal required.
 
-BlenderGDS requires the following Python packages:
+### Installing from Blender Extensions
 
-* `gdstk` - GDSII file handling
-* `klayout` - Layer merging to eliminate Cycles rendering artifacts
-* `numpy` - Numerical operations
-* `PyYAML` - Configuration file parsing
+1. In Blender, open **Edit → Preferences → Get Extensions**
+2. Search for **BlenderGDS**
+3. Click **Install**
 
-1. Check your installed Blender versions. If this directory doesn't exist, make sure you have started Blender at least once.
+The extension is now active. No restart needed.
 
-   ```bash
-   ls ~/.config/blender/
-   ```
+### Installing from a release
 
-2. Download the latest release from the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS)
+1. Download the latest `import_gdsii-*.zip` from the [GitHub releases page](https://github.com/aesc-silicon/BlenderGDS/releases)
+2. In Blender, open **Edit → Preferences → Get Extensions**
+3. Click the dropdown in the top-right corner and choose **Install from Disk...**
+4. Select the downloaded `.zip` file
+
+The extension is now active. No restart needed.
+
+### Building from source
+
+1. Clone the repository and build the extension zip:
 
    ```bash
    git clone https://github.com/aesc-silicon/BlenderGDS
    cd BlenderGDS
+   python scripts/build_extension.py
    ```
 
-3. Install these packages into Blender's module directory using pip:
+   This downloads wheels for all supported platforms (Linux, Windows, macOS) and produces `import_gdsii-*.zip` in the repo root.
+
+   If `blender` is not on your `PATH`, pass it explicitly:
 
    ```bash
-   make install_pip
+   python scripts/build_extension.py --blender /path/to/blender
    ```
 
-> [!Note]
-> If Blender was installed via Steam, it can be found at `$HOME/.local/share/Steam/steamapps/common/Blender/`.
-> In this case, use:
-> ```bash
-> BLENDER_EXE=$HOME/.local/share/Steam/steamapps/common/Blender/blender make install_pip
-> ```
+2. Install the resulting `.zip` as described above.
 
-### Installing the Add-on
+### Updating the extension
 
-1. Copy all files from `import_gdsii/` to the Blender directory
-
-   ```bash
-   make install
-   ```
-
-2. Start Blender
-3. In Blender, go to **Edit → Preferences → Add-ons**
-4. Enable the add-on by checking the box next to "Import-Export: GDSII Importer with PDK Support"
-
-### Updating the Add-on
-
-1. Fetch the latest version of BlenderGDS
-
-   ```bash
-   git pull
-   ```
-
-2. Update all files from `import_gdsii/` to the Blender directory
-
-   ```bash
-   make update
-   ```
+To update to a newer version, install the new `.zip` via **Get Extensions → Install from Disk...** — Blender will replace the existing installation automatically.
 
 ## Usage
 

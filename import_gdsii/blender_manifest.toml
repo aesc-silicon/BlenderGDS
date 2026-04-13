@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+schema_version = "1.0.0"
+
+id = "import_gdsii"
+version = "1.0.0"
+name = "BlenderGDS"
+tagline = "GDSII importer with PDK layer stack support"
+maintainer = "aesc silicon"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+
+tags = ["Import-Export"]
+
+wheels = [
+  # Populated by build_extension.py — do not edit by hand.
+]
