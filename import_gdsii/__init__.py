@@ -21,6 +21,12 @@ import os
 import tempfile
 from pathlib import Path
 
+# Blender on Windows bundles stubs for some packages that shadow the real wheels.
+# Evict them from the module cache so the extension wheels are imported instead.
+import sys
+for _mod in ('yaml', '_yaml', 'gdstk', 'klayout', 'klayout.db'):
+    sys.modules.pop(_mod, None)
+
 # Try to import required packages
 try:
     import gdstk
