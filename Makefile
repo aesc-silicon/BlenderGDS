@@ -7,7 +7,7 @@ BLENDER_DIR := $(dir $(BLENDER_EXE))
 BLENDER_VERSION := $(shell $(BLENDER_EXE) --version | head -n 1 | awk '{print substr($$2, 1, 3)}')
 PYTHON_EXE := $(shell find $(BLENDER_DIR) -type f -name "python3*" | head -n 1)
 
-PIPMODULES := gdstk numpy pyyaml
+PIPMODULES := gdstk numpy pyyaml klayout
 
 .PHONY: install install_pip
 
