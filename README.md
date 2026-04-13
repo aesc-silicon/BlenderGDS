@@ -36,6 +36,7 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 BlenderGDS requires the following Python packages:
 
 * `gdstk` - GDSII file handling
+* `klayout` - Layer merging to eliminate Cycles rendering artifacts
 * `numpy` - Numerical operations
 * `PyYAML` - Configuration file parsing
 
