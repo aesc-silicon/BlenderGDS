@@ -552,7 +552,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         if not DEPENDENCIES_OK:
-            self.report({'ERROR'}, f"Missing dependencies: {IMPORT_ERROR}. Install gdstk, numpy, and PyYAML.")
+            self.report({'ERROR'}, f"Missing dependencies: {IMPORT_ERROR}. Install gdstk, klayout, numpy and PyYAML.")
             return {'CANCELLED'}
 
         return self.import_gdsii(context, self.filepath)
