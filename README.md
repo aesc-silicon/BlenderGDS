@@ -36,7 +36,7 @@ BlenderGDS requires **Blender 4.2 or later**. All Python dependencies (`gdstk`, 
 ### Installing from Blender Extensions
 
 1. In Blender, open **Edit → Preferences → Get Extensions**
-2. Search for **BlenderGDS**
+2. Search for **GDSII Importer**
 3. Click **Install**
 
 The extension is now active. No restart needed.

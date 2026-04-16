@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 bl_info = {
-    "name": "GDSII Importer with PDK Support",
+    "name": "GDSII Importer",
     "author": "aesc silicon",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (3, 4, 0),
     "location": "File > Import",
     "description": "Import GDSII files with PDK layer stack support",
@@ -17,21 +17,15 @@ bl_info = {
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
+import numpy as np
 import os
 import tempfile
 from pathlib import Path
-
-# Blender on Windows bundles stubs for some packages that shadow the real wheels.
-# Evict them from the module cache so the extension wheels are imported instead.
-import sys
-for _mod in ('yaml', '_yaml', 'gdstk', 'klayout', 'klayout.db'):
-    sys.modules.pop(_mod, None)
 
 # Try to import required packages
 try:
     import gdstk
     import klayout.db as db
-    import numpy as np
     import yaml
     DEPENDENCIES_OK = True
 except ImportError as e:
@@ -558,7 +552,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         if not DEPENDENCIES_OK:
-            self.report({'ERROR'}, f"Missing dependencies: {IMPORT_ERROR}. Install gdstk, klayout, numpy and PyYAML.")
+            self.report({'ERROR'}, f"Missing dependencies: {IMPORT_ERROR}. Install gdstk, klayout and PyYAML.")
             return {'CANCELLED'}
 
         return self.import_gdsii(context, self.filepath)
@@ -717,7 +711,6 @@ def register():
     # Check dependencies on registration
     if not DEPENDENCIES_OK:
         print(f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
-        print("  Install with: pip install gdstk numpy pyyaml --break-system-packages")
 
     register_properties()
 

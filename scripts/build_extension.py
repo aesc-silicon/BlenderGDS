@@ -25,15 +25,17 @@ ADDON_DIR = REPO_DIR / "import_gdsii"
 WHEELS_DIR = ADDON_DIR / "wheels"
 MANIFEST_PATH = ADDON_DIR / "blender_manifest.toml"
 
-PACKAGES = ["gdstk", "numpy", "klayout", "PyYAML"]
-PYTHON_VERSION = "3.11"
+PACKAGES = ["gdstk", "klayout", "PyYAML"]
+
+# Blender 4.2/4.3 uses Python 3.11, Blender 4.4+ uses Python 3.13.
+# Downloading wheels for both ensures compatibility across all supported versions.
+PYTHON_VERSIONS = ["3.11", "3.13"]
 
 # One entry per (OS, architecture) combination that Blender supports.
 PLATFORMS = [
     "manylinux_2_28_x86_64",   # Linux x86-64
     "win_amd64",                # Windows x86-64
     "macosx_11_0_arm64",        # macOS Apple Silicon
-    "macosx_10_9_x86_64",       # macOS Intel
 ]
 
 MANIFEST_TEMPLATE = """\
@@ -44,8 +46,8 @@ MANIFEST_TEMPLATE = """\
 schema_version = "1.0.0"
 
 id = "import_gdsii"
-version = "1.0.0"
-name = "BlenderGDS"
+version = "1.0.1"
+name = "GDSII Importer"
 tagline = "GDSII importer with PDK layer stack support"
 maintainer = "aesc silicon"
 type = "add-on"
@@ -53,6 +55,8 @@ type = "add-on"
 blender_version_min = "4.2.0"
 
 license = ['SPDX:GPL-3.0-or-later']
+
+platforms = ["linux-x64", "windows-x64", "macos-arm64"]
 
 tags = ["Import-Export"]
 
@@ -68,22 +72,23 @@ def download_wheels() -> None:
         shutil.rmtree(WHEELS_DIR)
     WHEELS_DIR.mkdir()
 
-    for platform in PLATFORMS:
-        print(f"\nDownloading wheels for {platform}...")
-        try:
-            subprocess.run(
-                [
-                    sys.executable, "-m", "pip", "download",
-                    "--python-version", PYTHON_VERSION,
-                    "--only-binary=:all:",
-                    "--platform", platform,
-                    "--dest", str(WHEELS_DIR),
-                    *PACKAGES,
-                ],
-                check=True,
-            )
-        except subprocess.CalledProcessError:
-            print(f"  Warning: some packages could not be downloaded for {platform}")
+    for python_version in PYTHON_VERSIONS:
+        for platform in PLATFORMS:
+            print(f"\nDownloading wheels for {platform} (Python {python_version})...")
+            try:
+                subprocess.run(
+                    [
+                        sys.executable, "-m", "pip", "download",
+                        "--python-version", python_version,
+                        "--only-binary=:all:",
+                        "--platform", platform,
+                        "--dest", str(WHEELS_DIR),
+                        *PACKAGES,
+                    ],
+                    check=True,
+                )
+            except subprocess.CalledProcessError:
+                print(f"  Warning: some packages could not be downloaded for {platform} (Python {python_version})")
 
 
 def write_manifest() -> None:
@@ -103,6 +108,7 @@ def build(blender_exe: str) -> None:
             blender_exe, "--command", "extension", "build",
             "--source-dir", str(ADDON_DIR),
             "--output-dir", str(REPO_DIR),
+            "--split-platforms",
         ],
         check=True,
     )

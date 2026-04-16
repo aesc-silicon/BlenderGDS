@@ -5,15 +5,17 @@
 schema_version = "1.0.0"
 
 id = "import_gdsii"
-version = "1.0.0"
-name = "BlenderGDS"
+version = "1.0.1"
+name = "GDSII Importer"
 tagline = "GDSII importer with PDK layer stack support"
 maintainer = "aesc silicon"
 type = "add-on"
 
 blender_version_min = "4.2.0"
 
-license = ["SPDX:GPL-3.0-or-later"]
+license = ['SPDX:GPL-3.0-or-later']
+
+platforms = ["linux-x64", "windows-x64", "macos-arm64"]
 
 tags = ["Import-Export"]
 
