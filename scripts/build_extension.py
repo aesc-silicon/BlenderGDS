@@ -31,6 +31,9 @@ PACKAGES = ["gdstk", "klayout", "PyYAML"]
 # Downloading wheels for both ensures compatibility across all supported versions.
 PYTHON_VERSIONS = ["3.11", "3.13"]
 
+# Packages already bundled with Blender — exclude from the extension wheels.
+BLENDER_PROVIDED = ["numpy"]
+
 # One entry per (OS, architecture) combination that Blender supports.
 PLATFORMS = [
     "manylinux_2_28_x86_64",   # Linux x86-64
@@ -90,6 +93,12 @@ def download_wheels() -> None:
             except subprocess.CalledProcessError:
                 print(f"  Warning: some packages could not be downloaded for {platform} (Python {python_version})")
 
+    # Remove wheels for packages already provided by Blender.
+    for pkg in BLENDER_PROVIDED:
+        for whl in WHEELS_DIR.glob(f"{pkg}-*.whl"):
+            whl.unlink()
+            print(f"  Removed bundled-by-Blender wheel: {whl.name}")
+
 
 def write_manifest() -> None:
     wheels = sorted(WHEELS_DIR.glob("*.whl"))
@@ -132,6 +141,8 @@ def main() -> None:
         download_wheels()
     write_manifest()
     build(args.blender)
+    if WHEELS_DIR.exists():
+        shutil.rmtree(WHEELS_DIR)
     MANIFEST_PATH.write_text(MANIFEST_TEMPLATE.format(wheel_entries="  # Populated by build_extension.py — do not edit by hand."), encoding="utf-8")
     print("\nDone. Install the .zip via Blender > Preferences > Get Extensions > Install from Disk.")
 
