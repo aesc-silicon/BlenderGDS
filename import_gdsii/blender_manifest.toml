@@ -5,7 +5,7 @@
 schema_version = "1.0.0"
 
 id = "import_gdsii"
-version = "1.0.1"
+version = "1.0.2"
 name = "GDSII Importer"
 tagline = "GDSII importer with PDK layer stack support"
 maintainer = "aesc silicon"
