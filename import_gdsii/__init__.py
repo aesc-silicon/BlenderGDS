@@ -9,28 +9,20 @@ bl_info = {
     "blender": (3, 4, 0),
     "location": "File > Import",
     "description": "Import GDSII files with PDK layer stack support",
-    "warning": "Requires gdstk and PyYAML packages",
     "doc_url": "",
     "category": "Import-Export",
 }
 
+import os
+import tempfile
+from pathlib import Path
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
 import numpy as np
-import os
-import tempfile
-from pathlib import Path
-
-# Try to import required packages
-try:
-    import gdstk
-    import klayout.db as db
-    import yaml
-    DEPENDENCIES_OK = True
-except ImportError as e:
-    DEPENDENCIES_OK = False
-    IMPORT_ERROR = str(e)
+import gdstk
+import klayout.db as db
+import yaml
 
 
 # ============================================================================
@@ -551,10 +543,6 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box.label(text=pdk_name)
 
     def execute(self, context):
-        if not DEPENDENCIES_OK:
-            self.report({'ERROR'}, f"Missing dependencies: {IMPORT_ERROR}. Install gdstk, klayout and PyYAML.")
-            return {'CANCELLED'}
-
         return self.import_gdsii(context, self.filepath)
 
     def import_gdsii(self, context, filepath):
@@ -708,10 +696,6 @@ classes = (
 )
 
 def register():
-    # Check dependencies on registration
-    if not DEPENDENCIES_OK:
-        print(f"⚠ GDSII Importer: Missing dependencies - {IMPORT_ERROR}")
-
     register_properties()
 
     for cls in classes:
