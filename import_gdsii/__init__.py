@@ -341,17 +341,24 @@ class GDSIIPreImportDialog(bpy.types.Operator):
         default='IHP_SG13G2',
     )
 
-    config_path: StringProperty(
+    use_custom_config: BoolProperty(
+        name="Use Custom Config",
+        description="Use a custom YAML config file instead of built-in PDK",
+        default=False,
+    )
+
+    custom_config_path: StringProperty(
         name="Config Path",
         description="Path to PDK YAML configuration file",
         default="",
         subtype='FILE_PATH',
     )
 
-    use_custom_config: BoolProperty(
-        name="Use Custom Config",
-        description="Use a custom YAML config file instead of built-in PDK",
-        default=False,
+    custom_color_path: StringProperty(
+        name="Color Schema",
+        description="Color schema YAML file to use with the custom layer config",
+        default="",
+        subtype='FILE_PATH',
     )
 
     def invoke(self, context, event):
@@ -367,20 +374,32 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             addon_dir = Path(__file__).parent
             config_file = addon_dir / pdk_info['config_path']
             if config_file.exists():
-                self.config_path = str(config_file)
+                self.custom_config_path = str(config_file)
+            default_color = addon_dir / pdk_info['color_path'] / 'realistic.yaml'
+            if default_color.exists():
+                self.custom_color_path = str(default_color)
 
     def draw(self, context):
         layout = self.layout
 
         box = layout.box()
         box.label(text="Process Design Kit Selection", icon='PRESET')
-        box.prop(self, "pdk_selection")
+        row = box.row()
+        row.enabled = not self.use_custom_config
+        row.prop(self, "pdk_selection")
 
         box = layout.box()
         box.label(text="Configuration File", icon='FILE')
         box.prop(self, "use_custom_config")
         if self.use_custom_config:
-            box.prop(self, "config_path")
+            row = box.row()
+            row.alert = not Path(self.custom_config_path).is_file()
+            row.prop(self, "custom_config_path")
+            row = box.row()
+            row.alert = not Path(self.custom_color_path).is_file()
+            row.prop(self, "custom_color_path")
+            if not Path(self.custom_config_path).is_file() or not Path(self.custom_color_path).is_file():
+                box.label(text="Fix highlighted paths before importing", icon='ERROR')
         else:
             pdk_info = PDK_CONFIGS.get(self.pdk_selection, {})
             box.label(text=f"Using: {pdk_info.get('config_path', 'N/A')}", icon='INFO')
@@ -388,8 +407,9 @@ class GDSIIPreImportDialog(bpy.types.Operator):
     def execute(self, context):
         # Store PDK settings in scene for the importer to use
         context.scene.gdsii_pdk_selection = self.pdk_selection
-        context.scene.gdsii_config_path = self.config_path
         context.scene.gdsii_use_custom_config = self.use_custom_config
+        context.scene.gdsii_custom_config_path = self.custom_config_path
+        context.scene.gdsii_custom_color_path = self.custom_color_path
 
         # Open the file browser for GDSII import
         bpy.ops.import_scene.gdsii('INVOKE_DEFAULT')
@@ -513,10 +533,12 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box.label(text="Scene Setup:", icon='SCENE_DATA')
         box.prop(self, "setup_scene")
 
-        # Color scheme
-        box = layout.box()
-        box.label(text="Color Scheme:", icon='SCENE_DATA')
-        box.prop(self, "color_scheme")
+        # Color scheme (only for built-in PDK configs; custom config selects a file directly)
+        use_custom = getattr(context.scene, 'gdsii_use_custom_config', False)
+        if not use_custom:
+            box = layout.box()
+            box.label(text="Color Scheme:", icon='SCENE_DATA')
+            box.prop(self, "color_scheme")
 
         # Add metal dummy fill
         box = layout.box()
@@ -538,8 +560,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         # Show selected PDK
         box = layout.box()
         box.label(text="Selected PDK:", icon='PRESET')
-        pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
-        pdk_name = PDK_CONFIGS.get(pdk, {}).get('name', pdk)
+        if not use_custom:
+            pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+            pdk_name = PDK_CONFIGS.get(pdk, {}).get('name', pdk)
+        else:
+            pdk_name = "Custom"
         box.label(text=pdk_name)
 
     def execute(self, context):
@@ -550,12 +575,13 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         try:
             # Get PDK settings from scene
             pdk_selection = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
-            config_path = getattr(context.scene, 'gdsii_config_path', '')
             use_custom = getattr(context.scene, 'gdsii_use_custom_config', False)
+            custom_config_path = getattr(context.scene, 'gdsii_custom_config_path', '')
+            custom_color_path = getattr(context.scene, 'gdsii_custom_color_path', '')
 
             # Determine config file path
-            if use_custom and config_path:
-                yamlfile = Path(config_path)
+            if use_custom:
+                yamlfile = Path(custom_config_path)
             else:
                 # Use built-in PDK config
                 pdk_info = PDK_CONFIGS.get(pdk_selection, {})
@@ -563,7 +589,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 yamlfile = addon_dir / pdk_info.get('config_path', 'configs/ihp-sg13g2.yaml')
 
             # Load layer stack configuration
-            if not yamlfile.exists():
+            if not yamlfile.is_file():
                 self.report({'ERROR'}, f"Layer stack file not found: {yamlfile}")
                 return {'CANCELLED'}
 
@@ -610,7 +636,14 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 setup_chip_scene(chip_width, chip_height, collection)
 
             addon_dir = Path(__file__).parent
-            colorfile = addon_dir / pdk_info.get('color_path', 'configs/colors/ihp-sg13g2') / f"{self.color_scheme}.yaml"
+            if use_custom:
+                colorfile = Path(custom_color_path)
+            else:
+                color_dir = addon_dir / pdk_info.get('color_path', 'configs/colors/ihp-sg13g2')
+                colorfile = color_dir / f"{self.color_scheme}.yaml"
+            if not colorfile.is_file():
+                self.report({'ERROR'}, f"Color schema file not found: {colorfile}")
+                return {'CANCELLED'}
             color_file = yaml.safe_load(colorfile.read_text(encoding='utf-8'))
 
             print(f"Starting GDS import from: {filepath}")
@@ -682,13 +715,15 @@ def menu_func_import(self, context):
 # Properties to store PDK settings in scene
 def register_properties():
     bpy.types.Scene.gdsii_pdk_selection = StringProperty(default='IHP_SG13G2')
-    bpy.types.Scene.gdsii_config_path = StringProperty(default='')
     bpy.types.Scene.gdsii_use_custom_config = BoolProperty(default=False)
+    bpy.types.Scene.gdsii_custom_config_path = StringProperty(default='')
+    bpy.types.Scene.gdsii_custom_color_path = StringProperty(default='')
 
 def unregister_properties():
     del bpy.types.Scene.gdsii_pdk_selection
-    del bpy.types.Scene.gdsii_config_path
     del bpy.types.Scene.gdsii_use_custom_config
+    del bpy.types.Scene.gdsii_custom_config_path
+    del bpy.types.Scene.gdsii_custom_color_path
 
 classes = (
     GDSIIPreImportDialog,
