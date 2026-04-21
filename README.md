@@ -116,14 +116,12 @@ Metal1:
   type: 0
   z: 0.350
   height: 0.300
-  color: [0.45, 0.45, 0.50, 1.0]
 
 Via1:
   index: 19
   type: 0
   z: 0.650
   height: 0.350
-  color: [0.90, 0.70, 0.20, 1.0]
 ```
 
 Each layer requires:
@@ -132,13 +130,39 @@ Each layer requires:
 * `type`: GDS datatype
 * `z`: Z-position in micrometers
 * `height`: Layer thickness in micrometers
-* `color`: Layer RGBA values
 
 #### Parameters
 
 - `pdk` - Process Design Kit specification (e.g., `ihp-sg13g2`)
 - `output_file` - Path for the merged output GDS file
 - `input.gds` - Input GDS file to process
+
+### Color Schema Configuration
+
+Color schemas are defined in YAML format and control the material appearance of each layer.
+
+**Schema file structure:**
+
+```yaml
+name: Realistic
+description: Realistic color scheme
+layers:
+  Metal1:
+    color: [0.63, 0.64, 0.65, 1.0]
+    metallic: 0.8
+    roughness: 0.3
+
+  NWell:
+    color: [0.30, 0.45, 0.55, 0.65]
+```
+
+Each layer entry supports:
+
+* `color`: RGBA tuple with values in the range `[0.0, 1.0]`. The fourth component is the alpha (opacity).
+* `metallic` *(optional)*: Metallic factor from `0.0` (dielectric) to `1.0` (fully metallic). Defaults to `0.0`.
+* `roughness` *(optional)*: Surface roughness from `0.0` (mirror) to `1.0` (fully diffuse). Defaults to `0.5`.
+
+Layers not listed in the schema are rendered with a default grey material.
 
 ## Contributing
 
