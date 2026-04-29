@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Marketing
+description: Marketing color scheme
+layers:
+  # Silicon device layer (enhanced purple-grey)
+  Si:
+    color: [0.48, 0.42, 0.55, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+  SiRib90:
+    color: [0.42, 0.46, 0.55, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+  SiLitho193:
+    color: [0.55, 0.42, 0.55, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+
+  # SiN — soft blue tint
+  SiN:
+    color: [0.60, 0.72, 0.78, 0.85]
+    roughness: 0.3
+
+  # Doping — subtle pink/violet
+  SiNdope:
+    color: [0.55, 0.40, 0.55, 0.95]
+    metallic: 0.5
+    roughness: 0.45
+  SiNppdope:
+    color: [0.40, 0.40, 0.70, 0.95]
+    metallic: 0.5
+    roughness: 0.45
+
+  # Oxide opening — warm translucent
+  OxideOpen:
+    color: [0.95, 0.78, 0.55, 0.4]
+    roughness: 0.25
+
+  # Heater — warm metal
+  M1Heater:
+    color: [0.78, 0.66, 0.40, 1.0]
+    metallic: 0.7
+    roughness: 0.4
+
+  # VC — dark contrast tungsten
+  VC:
+    color: [0.38, 0.40, 0.43, 1.0]
+    metallic: 0.8
+    roughness: 0.35
+
+  # M2 routing — bright clean aluminum
+  M2Router:
+    color: [0.78, 0.80, 0.84, 1.0]
+    metallic: 0.8
+    roughness: 0.25
+
+  # Passivation opening
+  MOpen:
+    color: [0.08, 0.08, 0.10, 0.9]
+    roughness: 0.55
+
+  # Etches — cool darker tones
+  DeepTrench:
+    color: [0.04, 0.04, 0.06, 0.95]
+    roughness: 0.7
+  IsolationTrench:
+    color: [0.10, 0.10, 0.14, 0.90]
+    roughness: 0.6
+  ShelfEtch:
+    color: [0.28, 0.30, 0.32, 0.8]
+    roughness: 0.5
