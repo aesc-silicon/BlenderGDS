@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# SiEPIC EBeam PDK — silicon photonics SOI process
+# Reference: https://github.com/SiEPIC/SiEPIC_EBeam_PDK (klayout/EBeam/EBeam.lyp)
+# Stack assumes a 220 nm Si device layer on buried oxide, with SiN above the Si
+# in the upper cladding, then TiW heater (M1), tungsten via (VC), and Al routing (M2).
+
+# 220 nm patterned silicon waveguide layer
+Si:
+  index: 1
+  type: 0
+  z: 0.0
+  height: 0.220
+
+# 90 nm partial-etch rib (slab portion of rib waveguides)
+SiRib90:
+  index: 2
+  type: 0
+  z: 0.0
+  height: 0.090
+
+# Alternate Si lithography mask (193 nm DUV variant)
+SiLitho193:
+  index: 1
+  type: 69
+  z: 0.0005
+  height: 0.220
+
+# 400 nm silicon nitride waveguide, sitting in upper cladding above Si
+SiN:
+  index: 4
+  type: 0
+  z: 0.700
+  height: 0.400
+
+# N-type doping in Si (offset slightly above Si to keep its top face visible)
+SiNdope:
+  index: 20
+  type: 0
+  z: 0.001
+  height: 0.220
+
+# N++ heavy doping (offset further to differentiate from N region)
+SiNppdope:
+  index: 24
+  type: 0
+  z: 0.0015
+  height: 0.220
+
+# Oxide opening — window etched through cladding down to BOX
+OxideOpen:
+  index: 6
+  type: 0
+  z: 0.0
+  height: 0.050
+
+# M1 heater metal (TiW), sits above Si separated by oxide cladding
+M1Heater:
+  index: 11
+  type: 0
+  z: 2.000
+  height: 0.200
+
+# VC — tungsten via from M1 to M2
+VC:
+  index: 40
+  type: 0
+  z: 2.200
+  height: 0.400
+
+# M2 routing metal (aluminum)
+M2Router:
+  index: 12
+  type: 0
+  z: 2.600
+  height: 0.600
+
+# Metal opening — passivation opening over bondpads
+MOpen:
+  index: 13
+  type: 0
+  z: 3.200
+  height: 0.050
+
+# Deep trench (substrate cavity)
+DeepTrench:
+  index: 201
+  type: 0
+  z: -2.000
+  height: 2.000
+
+# Isolation trench (mid-depth)
+IsolationTrench:
+  index: 203
+  type: 0
+  z: -1.000
+  height: 1.000
+
+# Shallow shelf etch
+ShelfEtch:
+  index: 205
+  type: 0
+  z: -0.300
+  height: 0.300
