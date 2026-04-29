@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Realistic
+description: Realistic color scheme
+layers:
+  # Silicon device layer (slightly purple-grey crystalline appearance)
+  Si:
+    color: [0.42, 0.40, 0.45, 1.0]
+    metallic: 0.6
+    roughness: 0.4
+  SiRib90:
+    color: [0.42, 0.40, 0.45, 1.0]
+    metallic: 0.6
+    roughness: 0.4
+  SiLitho193:
+    color: [0.42, 0.40, 0.45, 1.0]
+    metallic: 0.6
+    roughness: 0.4
+
+  # Silicon nitride (slightly yellow-green, semi-transparent)
+  SiN:
+    color: [0.55, 0.55, 0.45, 0.85]
+    roughness: 0.35
+
+  # Doped silicon regions (faint reddish tint over Si)
+  SiNdope:
+    color: [0.50, 0.40, 0.42, 0.95]
+    metallic: 0.5
+    roughness: 0.45
+  SiNppdope:
+    color: [0.60, 0.35, 0.38, 0.95]
+    metallic: 0.5
+    roughness: 0.45
+
+  # Oxide opening — translucent window
+  OxideOpen:
+    color: [0.85, 0.88, 0.95, 0.35]
+    roughness: 0.2
+
+  # TiW heater — darker steel
+  M1Heater:
+    color: [0.50, 0.50, 0.55, 1.0]
+    metallic: 0.7
+    roughness: 0.45
+
+  # Tungsten via
+  VC:
+    color: [0.45, 0.46, 0.48, 1.0]
+    metallic: 0.8
+    roughness: 0.4
+
+  # Aluminum routing metal
+  M2Router:
+    color: [0.75, 0.76, 0.77, 1.0]
+    metallic: 0.8
+    roughness: 0.3
+
+  # Passivation opening (dark cavity)
+  MOpen:
+    color: [0.10, 0.10, 0.10, 0.85]
+    roughness: 0.6
+
+  # Etched trenches — dark cavities
+  DeepTrench:
+    color: [0.05, 0.05, 0.05, 0.95]
+    roughness: 0.7
+  IsolationTrench:
+    color: [0.10, 0.10, 0.10, 0.90]
+    roughness: 0.65
+  ShelfEtch:
+    color: [0.25, 0.25, 0.25, 0.80]
+    roughness: 0.55

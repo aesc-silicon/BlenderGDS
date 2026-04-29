@@ -51,6 +51,11 @@ PDK_CONFIGS = {
         'config_path': 'configs/gf180mcu.yaml',
         'color_path': 'configs/colors/gf180mcu/'
     },
+    'SIEPIC_EBEAM': {
+        'name': 'SiEPIC EBeam PDK',
+        'config_path': 'configs/siepic.yaml',
+        'color_path': 'configs/colors/siepic/'
+    },
 }
 
 
@@ -58,7 +63,7 @@ PDK_CONFIGS = {
 # SCENE SETUP FUNCTIONS
 # ============================================================================
 
-def setup_chip_scene(chip_x, chip_y, collection=None):
+def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
     """Initialize scene with camera, light, and chip base"""
     # Determine which collection to use
     target_collection = collection if collection is not None else bpy.context.collection
@@ -126,8 +131,8 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
     target_collection.objects.link(cam)
     bpy.context.scene.camera = cam
 
-    # Position camera above the chip
-    cam.location = (chip_x / 2, chip_y / 2, 200)
+    # Position camera above the chip center
+    cam.location = ((x_min + x_max) / 2, (y_min + y_max) / 2, 200)
     cam.rotation_euler = (0, 0, 0)
 
     # --------------------------
@@ -137,11 +142,11 @@ def setup_chip_scene(chip_x, chip_y, collection=None):
     chip_base = bpy.data.objects.new("ChipBase", mesh)
     target_collection.objects.link(chip_base)
 
-    # Define vertices for a plane of correct size
-    verts = [(0, 0, -1),
-             (0, chip_y, -1),
-             (chip_x, chip_y, -1),
-             (chip_x, 0, -1)]
+    # Define vertices for a plane spanning the actual chip bbox
+    verts = [(x_min, y_min, -1),
+             (x_min, y_max, -1),
+             (x_max, y_max, -1),
+             (x_max, y_min, -1)]
     faces = [(0, 1, 2, 3)]
     mesh.from_pydata(verts, [], faces)
     mesh.update()
@@ -337,6 +342,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             ('IHP_SG13CMOS5L', "IHP Open PDK SG13CMOS5L", "IHP SG13CMOS5L 130nm CMOS5L process"),
             ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
             ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
+            ('SIEPIC_EBEAM', "SiEPIC EBeam PDK", "SiEPIC EBeam silicon photonics PDK (220 nm SOI)"),
         ],
         default='IHP_SG13G2',
     )
@@ -607,19 +613,16 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     self.crop_y + self.crop_height
                 )
                 crop_offset = (self.crop_x, self.crop_y)
-                chip_width = self.crop_width
-                chip_height = self.crop_height
+                # Cropped polygons are shifted so the lower-left sits at the origin.
+                bbox_min = (0.0, 0.0)
+                bbox_max = (self.crop_width, self.crop_height)
                 print(f"Cropping to region: X={self.crop_x}, Y={self.crop_y}, W={self.crop_width}, H={self.crop_height}")
             else:
                 # Determine chip dimensions for scene setup
                 lib = gdstk.read_gds(filepath, unit=self.unit_scale)
                 bboxes = [c.bounding_box() for c in lib.top_level() if c.bounding_box() is not None]
-                xmin = min(b[0][0] for b in bboxes)
-                ymin = min(b[0][1] for b in bboxes)
-                xmax = max(b[1][0] for b in bboxes)
-                ymax = max(b[1][1] for b in bboxes)
-                chip_width = xmax - xmin
-                chip_height = ymax - ymin
+                bbox_min = (min(b[0][0] for b in bboxes), min(b[0][1] for b in bboxes))
+                bbox_max = (max(b[1][0] for b in bboxes), max(b[1][1] for b in bboxes))
 
             # Create collection for imported layers
             collection = None
@@ -633,7 +636,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 
             # Setup scene if requested
             if self.setup_scene:
-                setup_chip_scene(chip_width, chip_height, collection)
+                setup_chip_scene(bbox_min[0], bbox_min[1], bbox_max[0], bbox_max[1], collection)
 
             addon_dir = Path(__file__).parent
             if use_custom:

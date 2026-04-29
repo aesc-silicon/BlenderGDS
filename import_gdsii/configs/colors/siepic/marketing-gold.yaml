@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Marketing (Gold)
+description: Marketing color scheme with gold
+layers:
+  # Silicon — vibrant violet-grey
+  Si:
+    color: [0.50, 0.40, 0.65, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+  SiRib90:
+    color: [0.40, 0.50, 0.70, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+  SiLitho193:
+    color: [0.62, 0.40, 0.62, 1.0]
+    metallic: 0.6
+    roughness: 0.35
+
+  # SiN — clean teal
+  SiN:
+    color: [0.55, 0.78, 0.78, 0.85]
+    roughness: 0.3
+
+  # Doping — rich pink/violet
+  SiNdope:
+    color: [0.65, 0.30, 0.55, 0.95]
+    metallic: 0.5
+    roughness: 0.4
+  SiNppdope:
+    color: [0.40, 0.20, 0.65, 0.95]
+    metallic: 0.5
+    roughness: 0.4
+
+  # Oxide opening — warm gold tint
+  OxideOpen:
+    color: [0.98, 0.78, 0.30, 0.5]
+    metallic: 0.4
+    roughness: 0.3
+
+  # Heater — gold accent
+  M1Heater:
+    color: [0.92, 0.72, 0.22, 1.0]
+    metallic: 0.8
+    roughness: 0.3
+
+  # VC — gold via
+  VC:
+    color: [0.86, 0.62, 0.20, 1.0]
+    metallic: 0.8
+    roughness: 0.3
+
+  # M2 routing — luxurious gold
+  M2Router:
+    color: [0.98, 0.82, 0.32, 1.0]
+    metallic: 0.85
+    roughness: 0.25
+
+  # Passivation opening — deep contrast
+  MOpen:
+    color: [0.06, 0.06, 0.08, 0.9]
+    roughness: 0.55
+
+  # Etches — cool dark contrast
+  DeepTrench:
+    color: [0.04, 0.04, 0.06, 0.95]
+    roughness: 0.7
+  IsolationTrench:
+    color: [0.10, 0.10, 0.12, 0.9]
+    roughness: 0.6
+  ShelfEtch:
+    color: [0.30, 0.28, 0.26, 0.8]
+    roughness: 0.5
