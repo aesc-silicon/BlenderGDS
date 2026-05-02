@@ -163,6 +163,8 @@ def build(blender_exe: str, version: str, dirty: bool) -> None:
             suffix = zip_path.suffix                    # .zip
             # Insert -dirty before the platform suffix (last dash-separated token)
             parts = stem.rsplit("-", 1)                 # ['import_gdsii-1.0.3', 'linux-x64']
+            if parts[0].endswith('dirty'):
+                parts[0] = parts[0].removesuffix('-dirty')
             new_name = f"{parts[0]}-dirty-{parts[1]}{suffix}"
             zip_path.rename(zip_path.parent / new_name)
             print(f"  Renamed → {new_name}")
