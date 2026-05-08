@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Tom <tom@flexcompute.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Marketing
+description: Marketing color scheme
+layers:
+  # LN ridge — refined violet
+  LN_RIDGE:
+    color: [0.62, 0.52, 0.78, 1.0]
+    metallic: 0.3
+    roughness: 0.30
+
+  # LN slab — deeper companion shade
+  LN_SLAB:
+    color: [0.50, 0.42, 0.68, 0.90]
+    metallic: 0.3
+    roughness: 0.35
+
+  # Etched slab — dark cool void
+  SLAB_NEGATIVE:
+    color: [0.10, 0.10, 0.16, 0.50]
+    roughness: 0.55
+
+  # Labels — soft slate
+  LABELS:
+    color: [0.30, 0.34, 0.42, 1.0]
+    roughness: 0.55
+
+  # Chip outline — muted peach
+  CHIP_CONTOUR:
+    color: [0.95, 0.74, 0.68, 0.7]
+    roughness: 0.65
+
+  # Exclusion zone — soft teal
+  CHIP_EXCLUSION_ZONE:
+    color: [0.20, 0.78, 0.62, 0.35]
+    roughness: 0.6
+
+  # Electrodes — clean platinum
+  TL:
+    color: [0.86, 0.88, 0.92, 1.0]
+    metallic: 0.85
+    roughness: 0.25
+
+  # Heaters — warm rose-gold accent
+  HT:
+    color: [0.78, 0.55, 0.45, 1.0]
+    metallic: 0.7
+    roughness: 0.40

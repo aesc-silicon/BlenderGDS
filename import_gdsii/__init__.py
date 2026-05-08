@@ -56,6 +56,11 @@ PDK_CONFIGS = {
         'config_path': 'configs/siepic.yaml',
         'color_path': 'configs/colors/siepic/'
     },
+    'LNOI400': {
+        'name': 'Luxtelligence LNOI400 PDK',
+        'config_path': 'configs/lnoi400.yaml',
+        'color_path': 'configs/colors/lnoi400/'
+    },
 }
 
 
@@ -343,6 +348,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
             ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
             ('SIEPIC_EBEAM', "SiEPIC EBeam PDK", "SiEPIC EBeam silicon photonics PDK (220 nm SOI)"),
+            ('LNOI400', "Luxtelligence LNOI400 PDK", "Luxtelligence LNOI400 thin-film lithium niobate (X-cut, 400 nm LN, 200 nm etch) photonics PDK"),
         ],
         default='IHP_SG13G2',
     )

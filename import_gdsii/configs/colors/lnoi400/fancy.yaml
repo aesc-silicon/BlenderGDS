@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2026 Tom <tom@flexcompute.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Fancy
+description: Fancy color scheme - vivid flat aesthetic
+layers:
+  # LN ridge — vivid violet (matches KLayout default #ca84f5)
+  LN_RIDGE:
+    color: [0.79, 0.52, 0.96, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # LN slab — deeper purple (matches #875dd4)
+  LN_SLAB:
+    color: [0.53, 0.36, 0.83, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Etched slab — darkest purple (matches #4c209e)
+  SLAB_NEGATIVE:
+    color: [0.30, 0.13, 0.62, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Labels — steel blue (matches #5179b5)
+  LABELS:
+    color: [0.32, 0.47, 0.71, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Chip outline — peach (matches #ffc6b8)
+  CHIP_CONTOUR:
+    color: [1.00, 0.78, 0.72, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Exclusion zone — vivid mint (matches #00fe9c)
+  CHIP_EXCLUSION_ZONE:
+    color: [0.00, 1.00, 0.61, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Electrodes — light blue (matches #8dc2f7)
+  TL:
+    color: [0.55, 0.76, 0.97, 1.0]
+    metallic: 0.0
+    roughness: 1.0
+
+  # Heaters — same hue, different feel (KLayout uses dotted hatch on this layer)
+  HT:
+    color: [0.55, 0.76, 0.97, 1.0]
+    metallic: 0.0
+    roughness: 1.0

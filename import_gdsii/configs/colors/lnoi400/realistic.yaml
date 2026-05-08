@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Tom <tom@flexcompute.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Realistic
+description: Realistic color scheme
+layers:
+  # Lithium niobate ridge — slightly translucent, faint blue-grey crystalline tint
+  LN_RIDGE:
+    color: [0.82, 0.84, 0.92, 0.85]
+    metallic: 0.2
+    roughness: 0.25
+
+  # LN slab beneath the ridge
+  LN_SLAB:
+    color: [0.80, 0.82, 0.90, 0.75]
+    metallic: 0.2
+    roughness: 0.30
+
+  # Etched-away slab regions — rendered as a dark translucent void
+  SLAB_NEGATIVE:
+    color: [0.08, 0.08, 0.10, 0.30]
+    roughness: 0.55
+
+  # Text labels — dark, matte
+  LABELS:
+    color: [0.08, 0.08, 0.08, 1.0]
+    roughness: 0.6
+
+  # Chip outline — soft peach (matches KLayout default)
+  CHIP_CONTOUR:
+    color: [1.00, 0.78, 0.72, 0.6]
+    roughness: 0.7
+
+  # Exclusion zone — subtle warning green
+  CHIP_EXCLUSION_ZONE:
+    color: [0.00, 1.00, 0.61, 0.30]
+    roughness: 0.7
+
+  # RF / EO drive electrodes — gold (typical for LNOI EO modulators)
+  TL:
+    color: [0.92, 0.78, 0.45, 1.0]
+    metallic: 0.95
+    roughness: 0.25
+
+  # Heater traces — darker resistive metal (NiCr-like)
+  HT:
+    color: [0.55, 0.50, 0.45, 1.0]
+    metallic: 0.7
+    roughness: 0.45

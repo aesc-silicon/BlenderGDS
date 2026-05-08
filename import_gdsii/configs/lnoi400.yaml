@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 Tom <tom@flexcompute.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Luxtelligence LNOI400 PDK — thin-film lithium niobate on insulator (X-cut LNOI)
+# Reference: https://github.com/Luxtelligence/lxt_pdk_gf  (lnoi400/tech.py, lnoi400/layers.yaml)
+#
+# Implicit (not GDS) layers in the stack:
+#   - 525 µm Si handle wafer (substrate, zmin = -14.7 µm)
+#   - 4.7 µm buried oxide (SiO2)
+#   - 2 µm SiO2 upper cladding above the LN device layer
+# Only patterned layers have GDS index/type pairs and are extruded below.
+
+# Patterned LN ridge waveguide (200 nm ridge on top of slab)
+LN_RIDGE:
+  index: 2
+  type: 0
+  z: 0.200
+  height: 0.200
+
+# 200 nm LN slab beneath the ridge
+LN_SLAB:
+  index: 3
+  type: 0
+  z: 0.0
+  height: 0.200
+
+# Negative tone of slab — region where the slab has been etched away
+SLAB_NEGATIVE:
+  index: 3
+  type: 1
+  z: 0.0
+  height: 0.200
+
+# Text labels — thin sliver above metal so they do not occlude geometry
+LABELS:
+  index: 4
+  type: 0
+  z: 2.310
+  height: 0.010
+
+# Chip outline — thin marker at substrate level
+CHIP_CONTOUR:
+  index: 6
+  type: 0
+  z: -0.010
+  height: 0.010
+
+# Chip exclusion zone (no-go region for components)
+CHIP_EXCLUSION_ZONE:
+  index: 6
+  type: 1
+  z: -0.010
+  height: 0.010
+
+# Transmission-line electrode metal (RF/EO drive electrodes)
+TL:
+  index: 21
+  type: 0
+  z: 1.400
+  height: 0.900
+
+# Heater traces (resistive thin-film heaters for thermo-optic phase shifters)
+HT:
+  index: 21
+  type: 1
+  z: 1.400
+  height: 0.900

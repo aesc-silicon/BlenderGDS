@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 Tom <tom@flexcompute.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Marketing (Gold)
+description: Marketing color scheme with gold
+layers:
+  # LN ridge — warm violet with gold overtone
+  LN_RIDGE:
+    color: [0.65, 0.55, 0.78, 1.0]
+    metallic: 0.3
+    roughness: 0.30
+
+  # LN slab — deeper companion shade
+  LN_SLAB:
+    color: [0.52, 0.44, 0.66, 0.90]
+    metallic: 0.3
+    roughness: 0.35
+
+  # Etched slab — deep cool void for contrast
+  SLAB_NEGATIVE:
+    color: [0.08, 0.08, 0.12, 0.55]
+    roughness: 0.55
+
+  # Labels — warm muted brown
+  LABELS:
+    color: [0.40, 0.32, 0.22, 1.0]
+    roughness: 0.55
+
+  # Chip outline — warm gold tint
+  CHIP_CONTOUR:
+    color: [0.96, 0.78, 0.45, 0.7]
+    roughness: 0.6
+
+  # Exclusion zone — soft amber
+  CHIP_EXCLUSION_ZONE:
+    color: [0.92, 0.72, 0.32, 0.35]
+    roughness: 0.6
+
+  # Electrodes — luxurious gold
+  TL:
+    color: [0.98, 0.82, 0.32, 1.0]
+    metallic: 0.90
+    roughness: 0.25
+
+  # Heaters — darker antique gold
+  HT:
+    color: [0.72, 0.55, 0.20, 1.0]
+    metallic: 0.8
+    roughness: 0.35
