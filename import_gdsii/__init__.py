@@ -147,11 +147,14 @@ def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
     chip_base = bpy.data.objects.new("ChipBase", mesh)
     target_collection.objects.link(chip_base)
 
-    # Define vertices for a plane spanning the actual chip bbox
-    verts = [(x_min, y_min, -1),
-             (x_min, y_max, -1),
-             (x_max, y_max, -1),
-             (x_max, y_min, -1)]
+    # Define vertices for a fixed 40x40mm plane centered on the chip for shadow casting
+    cx = (x_min + x_max) / 2
+    cy = (y_min + y_max) / 2
+    extent = 20000  # 20mm in micrometers
+    verts = [(cx - extent, cy - extent, -1),
+             (cx - extent, cy + extent, -1),
+             (cx + extent, cy + extent, -1),
+             (cx + extent, cy - extent, -1)]
     faces = [(0, 1, 2, 3)]
     mesh.from_pydata(verts, [], faces)
     mesh.update()
