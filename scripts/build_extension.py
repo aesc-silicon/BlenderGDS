@@ -28,9 +28,10 @@ MANIFEST_PATH = ADDON_DIR / "blender_manifest.toml"
 
 PACKAGES = ["gdstk", "klayout", "PyYAML"]
 
-# Blender 4.2/4.3 uses Python 3.11, Blender 4.4+ uses Python 3.13.
-# Downloading wheels for both ensures compatibility across all supported versions.
-PYTHON_VERSIONS = ["3.11", "3.13"]
+# Blender 4.2/4.3 uses Python 3.11, Blender 4.4+ uses Python 3.13. Fedora's
+# flatpak version of 5.1 uses Python 3.14
+# Downloading wheels for all ensures compatibility across all supported versions.
+PYTHON_VERSIONS = ["3.11", "3.13", "3.14"]
 
 # Packages already bundled with Blender — exclude from the extension wheels.
 BLENDER_PROVIDED = ["numpy"]
