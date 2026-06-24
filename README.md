@@ -166,6 +166,50 @@ Each layer entry supports:
 
 Layers not listed in the schema are rendered with a default grey material.
 
+## Adding a New PDK
+
+PDKs are **auto-discovered** from the `import_gdsii/configs/` directory — there
+is no hard-coded list in the Python source to keep in sync. Adding a PDK is a
+matter of dropping in YAML files; **no code changes are required**.
+
+To add a PDK with stem `<pdk>` (e.g. `mypdk`):
+
+1. **Layer stack** — create `import_gdsii/configs/<pdk>.yaml` describing each
+   layer (`index`, `type`, `z`, `height`), using the format shown under
+   [Layer Configuration](#layer-configuration). The `index`/`type` values must
+   match the GDS layer/datatype numbers used by the PDK; `z`/`height` are the
+   3D stack positions in micrometers (estimates are fine for visualization).
+
+2. **Color scheme** — create at least
+   `import_gdsii/configs/colors/<pdk>/realistic.yaml`. The layer names must
+   match the keys in the layer stack exactly. Add `fancy.yaml`,
+   `marketing.yaml`, `marketing-gold.yaml` for extra schemes if you like.
+
+3. **(Optional) Friendly name** — add an entry to
+   `import_gdsii/configs/pdks.yaml` to give the PDK a display name, description
+   and position in the dropdown:
+
+   ```yaml
+   mypdk:
+     name: My Fancy PDK
+     description: 65nm example process
+   ```
+
+   Without an entry, the PDK still appears, using its filename as the label.
+
+The new PDK shows up in the **Select PDK** dropdown automatically the next time
+the importer is launched. The enum key is the upper-cased stem (`mypdk` →
+`MYPDK`, `ihp-sg13g2` → `IHP_SG13G2`).
+
+You can validate your YAML files before building with:
+
+```bash
+python scripts/internal/check_configs.py
+```
+
+This checks the layer-stack schema and verifies that every color scheme covers
+exactly the layers defined in the stack.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues on the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS).

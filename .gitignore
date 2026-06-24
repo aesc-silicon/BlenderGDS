@@ -5,3 +5,5 @@
 venv/
 import_gdsii/wheels/
 *.zip
+__pycache__/
+*.pyc

@@ -14,7 +14,13 @@ with open(script_dir / 'color-schema.schema.json', encoding='utf-8') as f:
 
 project_dir = script_dir.parent.parent
 pdks = project_dir / "import_gdsii/configs"
+
+# Not a layer stack — purely optional PDK display metadata (names/order).
+META_FILE = "pdks.yaml"
+
 for process in pdks.glob('*yaml'):
+    if process.name == META_FILE:
+        continue
     print(f"Found process: {process.stem}")
 
     pdk_file = yaml.safe_load(process.read_text(encoding='utf-8'))

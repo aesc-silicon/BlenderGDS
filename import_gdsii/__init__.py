@@ -28,40 +28,109 @@ import yaml
 # ============================================================================
 # PDK DEFINITIONS
 # ============================================================================
+#
+# PDKs are *auto-discovered* from the ``configs/`` directory — there is no
+# hard-coded list to keep in sync.  To add a new PDK, simply drop in:
+#
+#   * configs/<pdk>.yaml                  -> the layer stack (index/type/z/height)
+#   * configs/colors/<pdk>/realistic.yaml -> at least one color scheme
+#
+# and (optionally) add a friendly name/description/ordering to
+# ``configs/pdks.yaml``.  No Python changes are required.  See the
+# "Adding a PDK" section of the README for details.
 
-# PDK Configuration paths
-PDK_CONFIGS = {
-    'IHP_SG13G2': {
-        'name': 'IHP Open PDK (SG13G2)',
-        'config_path': 'configs/ihp-sg13g2.yaml',
-        'color_path': 'configs/colors/ihp-sg13g2/'
-    },
-    'IHP_SG13CMOS5L': {
-        'name': 'IHP Open PDK (SG13CMOS5L)',
-        'config_path': 'configs/ihp-sg13cmos5l.yaml',
-        'color_path': 'configs/colors/ihp-sg13cmos5l/'
-    },
-    'SKY130': {
-        'name': 'SkyWater SKY130 PDK',
-        'config_path': 'configs/sky130.yaml',
-        'color_path': 'configs/colors/sky130/'
-    },
-    'GF180MCU': {
-        'name': 'GlobalFoundries GF180MCU PDK',
-        'config_path': 'configs/gf180mcu.yaml',
-        'color_path': 'configs/colors/gf180mcu/'
-    },
-    'SIEPIC_EBEAM': {
-        'name': 'SiEPIC EBeam PDK',
-        'config_path': 'configs/siepic.yaml',
-        'color_path': 'configs/colors/siepic/'
-    },
-    'LNOI400': {
-        'name': 'Luxtelligence LNOI400 PDK',
-        'config_path': 'configs/lnoi400.yaml',
-        'color_path': 'configs/colors/lnoi400/'
-    },
-}
+# Filename of the optional PDK metadata file inside configs/.
+PDK_META_FILE = 'pdks.yaml'
+
+# Preferred default PDK key (used when present among the discovered PDKs).
+PREFERRED_DEFAULT_PDK = 'IHP_SG13G2'
+
+
+def _pdk_key_from_stem(stem):
+    """Derive a stable enum key from a config filename stem.
+
+    e.g. ``ihp-sg13g2`` -> ``IHP_SG13G2``, ``sky130`` -> ``SKY130``.
+    """
+    return stem.upper().replace('-', '_')
+
+
+def discover_pdks():
+    """Scan ``configs/`` and return an ordered dict of PDK definitions.
+
+    Each value is a dict with ``name``, ``description``, ``config_path``,
+    ``color_path`` and ``stem``.  Friendly names, descriptions and display
+    order can optionally be supplied by ``configs/pdks.yaml``; anything not
+    listed there is still discovered and gets a sensible default name.
+    """
+    addon_dir = Path(__file__).parent
+    configs_dir = addon_dir / 'configs'
+
+    # Optional metadata: { <stem>: {name, description}, ... } plus optional
+    # top-level "order" list of stems controlling display order.
+    meta = {}
+    order = []
+    meta_file = configs_dir / PDK_META_FILE
+    if meta_file.is_file():
+        try:
+            loaded = yaml.safe_load(meta_file.read_text(encoding='utf-8')) or {}
+            order = loaded.pop('order', []) or []
+            meta = loaded
+        except Exception as exc:  # pragma: no cover - defensive
+            print(f"⚠ Could not parse {PDK_META_FILE}: {exc}")
+
+    # Discover available layer-stack configs (everything except the metadata file).
+    found = {}
+    if configs_dir.is_dir():
+        for cfg in sorted(configs_dir.glob('*.yaml')):
+            if cfg.name == PDK_META_FILE:
+                continue
+            found[cfg.stem] = cfg.name
+
+    # Order: explicit "order" first, then any meta-listed stems, then the rest
+    # alphabetically — so curated PDKs appear first and new drop-ins still show.
+    ordered_stems = [s for s in order if s in found]
+    ordered_stems += [s for s in meta if s in found and s not in ordered_stems]
+    ordered_stems += [s for s in found if s not in ordered_stems]
+
+    pdks = {}
+    for stem in ordered_stems:
+        entry = meta.get(stem) or {}
+        key = _pdk_key_from_stem(stem)
+        pdks[key] = {
+            'name': entry.get('name', stem),
+            'description': entry.get('description', f"{stem} PDK"),
+            'config_path': f"configs/{found[stem]}",
+            'color_path': f"configs/colors/{stem}/",
+            'stem': stem,
+        }
+    return pdks
+
+
+# Discovered at import time. Re-discovery happens on register() so newly
+# dropped-in configs are picked up without restarting Blender.
+PDK_CONFIGS = discover_pdks()
+
+
+def get_default_pdk():
+    """Return the default PDK key — the preferred one if available, else first."""
+    if PREFERRED_DEFAULT_PDK in PDK_CONFIGS:
+        return PREFERRED_DEFAULT_PDK
+    return next(iter(PDK_CONFIGS), PREFERRED_DEFAULT_PDK)
+
+
+# Cache for the dynamically-built PDK enum items. Blender requires that the
+# strings backing EnumProperty items stay alive, so we keep them module-level.
+_PDK_ENUM_ITEMS = []
+
+
+def get_pdk_items(self, context):
+    """Build EnumProperty items from the discovered PDKs (Blender callback)."""
+    _PDK_ENUM_ITEMS.clear()
+    for key, info in PDK_CONFIGS.items():
+        _PDK_ENUM_ITEMS.append((key, info['name'], info.get('description', info['name'])))
+    if not _PDK_ENUM_ITEMS:
+        _PDK_ENUM_ITEMS.append(('NONE', 'No PDK configs found', 'No layer-stack configs in configs/'))
+    return _PDK_ENUM_ITEMS
 
 
 # ============================================================================
@@ -322,7 +391,7 @@ def get_color_schemes(self, context):
     """Dynamically generate color scheme list based on selected PDK"""
     items = []
 
-    pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+    pdk = getattr(context.scene, 'gdsii_pdk_selection', get_default_pdk())
     addon_dir = Path(__file__).parent
     color_path = addon_dir / PDK_CONFIGS.get(pdk, {}).get('color_path', pdk)
     schemes = [('realistic', 'Realistic', 'Realistic color scheme')]
@@ -345,15 +414,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
     pdk_selection: EnumProperty(
         name="PDK",
         description="Process Design Kit to use for layer stack",
-        items=[
-            ('IHP_SG13G2', "IHP Open PDK SG13G2", "IHP SG13G2 130nm BiCMOS process"),
-            ('IHP_SG13CMOS5L', "IHP Open PDK SG13CMOS5L", "IHP SG13CMOS5L 130nm CMOS5L process"),
-            ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
-            ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
-            ('SIEPIC_EBEAM', "SiEPIC EBeam PDK", "SiEPIC EBeam silicon photonics PDK (220 nm SOI)"),
-            ('LNOI400', "Luxtelligence LNOI400 PDK", "Luxtelligence LNOI400 thin-film lithium niobate (X-cut, 400 nm LN, 200 nm etch) photonics PDK"),
-        ],
-        default='IHP_SG13G2',
+        items=get_pdk_items,
     )
 
     use_custom_config: BoolProperty(
@@ -377,6 +438,12 @@ class GDSIIPreImportDialog(bpy.types.Operator):
     )
 
     def invoke(self, context, event):
+        # Default to the preferred PDK if it is available among the discovered set.
+        try:
+            self.pdk_selection = get_default_pdk()
+        except TypeError:
+            # Value not in the (dynamic) enum item set — leave Blender's default.
+            pass
         # Set default config path based on PDK selection
         self.update_config_path()
         return context.window_manager.invoke_props_dialog(self, width=400)
@@ -576,7 +643,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box = layout.box()
         box.label(text="Selected PDK:", icon='PRESET')
         if not use_custom:
-            pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+            pdk = getattr(context.scene, 'gdsii_pdk_selection', get_default_pdk())
             pdk_name = PDK_CONFIGS.get(pdk, {}).get('name', pdk)
         else:
             pdk_name = "Custom"
@@ -589,7 +656,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         """Main import function"""
         try:
             # Get PDK settings from scene
-            pdk_selection = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+            pdk_selection = getattr(context.scene, 'gdsii_pdk_selection', get_default_pdk())
             use_custom = getattr(context.scene, 'gdsii_use_custom_config', False)
             custom_config_path = getattr(context.scene, 'gdsii_custom_config_path', '')
             custom_color_path = getattr(context.scene, 'gdsii_custom_color_path', '')
@@ -726,7 +793,7 @@ def menu_func_import(self, context):
 
 # Properties to store PDK settings in scene
 def register_properties():
-    bpy.types.Scene.gdsii_pdk_selection = StringProperty(default='IHP_SG13G2')
+    bpy.types.Scene.gdsii_pdk_selection = StringProperty(default=get_default_pdk())
     bpy.types.Scene.gdsii_use_custom_config = BoolProperty(default=False)
     bpy.types.Scene.gdsii_custom_config_path = StringProperty(default='')
     bpy.types.Scene.gdsii_custom_color_path = StringProperty(default='')
@@ -743,6 +810,11 @@ classes = (
 )
 
 def register():
+    # Re-discover PDKs so configs dropped in since the module was first
+    # imported are picked up without restarting Blender.
+    global PDK_CONFIGS
+    PDK_CONFIGS = discover_pdks()
+
     register_properties()
 
     for cls in classes:

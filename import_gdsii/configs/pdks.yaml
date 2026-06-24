@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: 2026 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Optional PDK metadata for the GDSII importer.
+#
+# PDKs are auto-discovered from this directory: every "<stem>.yaml" layer-stack
+# file (except this one) becomes a selectable PDK whose enum key is the upper-
+# cased stem (e.g. "sky130" -> "SKY130", "ihp-sg13g2" -> "IHP_SG13G2").
+#
+# This file is purely cosmetic — it lets you give each PDK a friendly display
+# name, a description and a display order. Any config not listed here is still
+# discovered and shown using its filename as the name. To add a PDK you do NOT
+# need to edit any Python: drop a "configs/<stem>.yaml" layer stack and a
+# "configs/colors/<stem>/realistic.yaml" color scheme, then (optionally) add an
+# entry below.
+
+# Display order in the PDK dropdown. Stems not listed fall back to alphabetical.
+order:
+  - ihp-sg13g2
+  - ihp-sg13cmos5l
+  - sky130
+  - gf180mcu
+  - freepdk45
+  - asap7
+  - siepic
+  - lnoi400
+
+ihp-sg13g2:
+  name: IHP Open PDK (SG13G2)
+  description: IHP SG13G2 130nm BiCMOS process
+
+ihp-sg13cmos5l:
+  name: IHP Open PDK (SG13CMOS5L)
+  description: IHP SG13CMOS5L 130nm CMOS5L process
+
+sky130:
+  name: SkyWater SKY130 PDK
+  description: SkyWater SKY130 130nm process
+
+gf180mcu:
+  name: GlobalFoundries GF180MCU PDK
+  description: GlobalFoundries GF180MCU 180nm process
+
+freepdk45:
+  name: FreePDK45 / Nangate45 PDK
+  description: FreePDK45 45nm open predictive PDK (10 metal layers)
+
+asap7:
+  name: ASAP7 PDK
+  description: ASAP7 ASU 7nm FinFET predictive PDK (4x-scaled GDS)
+
+siepic:
+  name: SiEPIC EBeam PDK
+  description: SiEPIC EBeam silicon photonics PDK (220 nm SOI)
+
+lnoi400:
+  name: Luxtelligence LNOI400 PDK
+  description: >-
+    Luxtelligence LNOI400 thin-film lithium niobate
+    (X-cut, 400 nm LN, 200 nm etch) photonics PDK
