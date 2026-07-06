@@ -341,6 +341,7 @@ def get_pdk_list(self, context):
 
 def get_color_schemes(self, context):
     """Dynamically generate color scheme list based on selected PDK"""
+    # TODO: Load only when accessing list or when opening file explorer, not every refresh. Or add a refresh button
 
     pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
     addon_dir = Path(__file__).parent
@@ -410,7 +411,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             default_color = addon_dir / pdk_info['color_path'] / f"{pdk_info['def_color']}.yaml"
             if default_color.exists():
                 self.custom_color_path = str(default_color)
-    # TODO: don't use os.join and use this syntax instead everywhere
+                
     def draw(self, context):
         layout = self.layout
 
