@@ -19,7 +19,7 @@ for process in pdks.glob('*yaml'):
 
     pdk_file = yaml.safe_load(process.read_text(encoding='utf-8'))
     validate(pdk_file, pdk_schema)
-    pdk_layers = set(pdk_file.keys())
+    pdk_layers = set(key for key in pdk_file.keys() if not key=="pdk_config")
 
     for color in (pdks / f"colors/{process.stem}").glob('*yaml'):
         print(f"  Found color schema: {color.stem}")

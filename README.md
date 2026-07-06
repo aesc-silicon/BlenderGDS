@@ -133,6 +133,21 @@ Each layer requires:
 * `z`: Z-position in micrometers
 * `height`: Layer thickness in micrometers
 
+An optional field with metadata can be added to customize Blender's behavior when reading the file:
+
+```yaml
+pdk_config:
+  name: SkyWater SKY130 PDK
+  description: SkyWater SKY130 130nm process
+  order: 3
+  def_color: realistic
+```
+
+All metadata is optional:
+* `name/description` - Extra details of PDK. Takes file name if unset
+* `order` - Sets order of PDKs as they will appear in Blender's dropdown. Defaults to "0"
+* `def_color` - Sets default color scheme to be used for the PDK. Defaults to alphabetic order
+
 #### Parameters
 
 - `pdk` - Process Design Kit specification (e.g., `ihp-sg13g2`)

@@ -13,7 +13,9 @@
 
 pdk_config:
   name: Luxtelligence LNOI400 PDK
-  description: Luxtelligence LNOI400 thin-film lithium niobate (X-cut, 400 nm LN, 200 nm etch) photonics PDK
+  description: >
+    Luxtelligence LNOI400 thin-film lithium niobate (X-cut, 400 nm LN, 200 nm etch)
+    photonics PDK
   order: 6
   def_color: realistic
 

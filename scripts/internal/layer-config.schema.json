@@ -3,29 +3,32 @@
   "title": "Layer Configuration",
   "description": "Schema for validating layer configuration YAML files with index, type, z-position, and height",
   "type": "object",
+  "properties": {
+    "pdk_config": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "order": {
+          "type": "integer"
+        },
+        "def_color": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
   "patternProperties": {
-    "^[A-Za-z0-9_]+$": {
+    "^(?!pdk_config$)[A-Za-z0-9_]+$": {
       "type": "object",
       "required": ["index", "type", "z", "height"],
       "properties": {
-        "pdk_config": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "order": {
-              "type": "integer"
-            },
-            "def_color": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
         "index": {
           "type": "integer",
           "description": "Layer index number",
