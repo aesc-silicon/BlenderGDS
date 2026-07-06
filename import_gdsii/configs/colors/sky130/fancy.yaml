@@ -7,68 +7,68 @@ description: Fancy color scheme - vivid flat aesthetic
 layers:
   # Silicon layers
   nwell:
-    color: [0.10, 0.30, 0.90, 0.65]      # Deep blue
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.30, 0.90, 0.65]      # Deep blue
+    Metallic: 0.0
+    Roughness: 1.0
   diff:
-    color: [0.10, 0.95, 0.25, 0.90]      # Bright green
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.95, 0.25, 0.90]      # Bright green
+    Metallic: 0.0
+    Roughness: 1.0
   poly:
-    color: [0.95, 0.08, 0.08, 0.95]      # Vivid red
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.95, 0.08, 0.08, 0.95]      # Vivid red
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Local interconnect - orange
   li1:
-    color: [1.0, 0.52, 0.05, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.52, 0.05, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Contacts & vias - bright white
   licon:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   mcon:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   via:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   via2:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   via3:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   via4:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Metal layers - vivid rainbow spectrum (Blue → Violet → Red → Orange → Gold)
   met1:
-    color: [0.15, 0.40, 1.0, 1.0]        # Blue
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.15, 0.40, 1.0, 1.0]        # Blue
+    Metallic: 0.0
+    Roughness: 1.0
   met2:
-    color: [0.55, 0.10, 1.0, 1.0]        # Violet
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.55, 0.10, 1.0, 1.0]        # Violet
+    Metallic: 0.0
+    Roughness: 1.0
   met3:
-    color: [1.0, 0.08, 0.08, 1.0]        # Red
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.08, 0.08, 1.0]        # Red
+    Metallic: 0.0
+    Roughness: 1.0
   met4:
-    color: [1.0, 0.52, 0.05, 1.0]        # Orange
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.52, 0.05, 1.0]        # Orange
+    Metallic: 0.0
+    Roughness: 1.0
   met5:
-    color: [1.0, 0.78, 0.10, 1.0]        # Gold (top metal)
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.78, 0.10, 1.0]        # Gold (top metal)
+    Metallic: 0.0
+    Roughness: 1.0

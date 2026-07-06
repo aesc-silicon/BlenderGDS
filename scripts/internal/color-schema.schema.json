@@ -13,42 +13,96 @@
       "type": "string",
       "description": "Description of the color scheme"
     },
-    "layers": {
+    "materials": {
       "type": "object",
-      "description": "Layer definitions with colors",
+      "description": "Named Blender material definitions",
       "patternProperties": {
         "^[A-Za-z0-9_]+$": {
-          "type": "object",
-          "required": ["color"],
-          "properties": {
-            "color": {
-              "type": "array",
-              "description": "RGBA color values (red, green, blue, alpha) ranging from 0.0 to 1.0",
-              "minItems": 4,
-              "maxItems": 4,
-              "items": {
-                "type": "number",
-                "minimum": 0.0,
-                "maximum": 1.0
-              }
-            },
-            "metallic": {
-              "type": "number",
-              "description": "Metallic property for PBR rendering (0.0 = non-metallic, 1.0 = fully metallic)",
-              "minimum": 0.0,
-              "maximum": 1.0
-            },
-            "roughness": {
-              "type": "number",
-              "description": "Roughness property for PBR rendering (0.0 = smooth/glossy, 1.0 = rough/matte)",
-              "minimum": 0.0,
-              "maximum": 1.0
-            }
-          },
-          "additionalProperties": false
+          "$ref": "#/definitions/material"
         }
       },
       "additionalProperties": false
+    },
+    "layers": {
+      "type": "object",
+      "description": "Layer definitions. Each layer may either reference a named material or define one inline.",
+      "patternProperties": {
+        "^[A-Za-z0-9_]+$": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Reference to a named material."
+            },
+            {"$ref": "#/definitions/material"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "material": {
+      "type": "object",
+      "description": "A Blender Principled BSDF material definition.",
+      "properties": {
+        "Base Color":            {"$ref": "#/definitions/rgba"},
+        "Metallic":              {"$ref": "#/definitions/value"},
+        "Roughness":             {"$ref": "#/definitions/value"},
+        "IOR":                   {"$ref": "#/definitions/value"},
+        "Alpha":                 {"$ref": "#/definitions/value"},
+        "Weight":                {"$ref": "#/definitions/value"},
+        "Diffuse Roughness":     {"$ref": "#/definitions/value"},
+        "Subsurface Type":       {
+          "type": "string",
+          "description": "Subsurface scattering method.",
+          "enum": [
+            "BURLEY", "RANDOM_WALK", "RANDOM_WALK_SKIN"
+          ]
+        },
+        "Subsurface Weight":     {"$ref": "#/definitions/value"},
+        "Subsurface Scale":      {"$ref": "#/definitions/value"},
+        "Subsurface IOR":        {"$ref": "#/definitions/value"},
+        "Subsurface Anisotropy": {"$ref": "#/definitions/value"},
+        "Specular Type":         {
+          "$ref": "string",
+          "description": "Specular distribution method.",
+          "enum": [
+            "GGX", "MULTI_GGX"
+          ]
+        },
+        "Specular IOR Level":    {"$ref": "#/definitions/value"},
+        "Specular Tint":         {"$ref": "#/definitions/rgba"},
+        "Anisotropic":           {"$ref": "#/definitions/value"},
+        "Anisotropic Rotation":  {"$ref": "#/definitions/value"},
+        "Transmission Weight":   {"$ref": "#/definitions/value"},
+        "Coat Weight":           {"$ref": "#/definitions/value"},
+        "Coat Roughness":        {"$ref": "#/definitions/value"},
+        "Coat IOR":              {"$ref": "#/definitions/value"},
+        "Coat Tint":             {"$ref": "#/definitions/rgba"},
+        "Sheen Weight":          {"$ref": "#/definitions/value"},
+        "Sheen Roughness":       {"$ref": "#/definitions/value"},
+        "Sheen Tint":            {"$ref": "#/definitions/rgba"},
+        "Emission Color":        {"$ref": "#/definitions/rgba"},
+        "Emission Strength":     {"$ref": "#/definitions/value"},
+        "Thin Film Thickness":   {"$ref": "#/definitions/value"},
+        "Thin Film IOR":         {"$ref": "#/definitions/value"}
+      },
+      "additionalProperties": false
+    },
+    "value": {
+      "type": "number",
+      "description": "A scalar numeric value."
+    },
+    "rgba": {
+      "type": "array",
+      "description": "RGB or RGBA color. Each channel in [0.0, 1.0].",
+      "minItems": 3,
+      "maxItems": 4,
+      "items": {
+        "type": "number",
+        "minimum": 0.0,
+        "maximum": 1.0
+      }
     }
   },
   "additionalProperties": false

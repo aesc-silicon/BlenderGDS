@@ -7,66 +7,66 @@ description: Fancy color scheme - vivid flat aesthetic
 layers:
   # Silicon layers
   Comp:
-    color: [0.10, 0.95, 0.25, 0.90]      # Bright green (active)
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.95, 0.25, 0.90]      # Bright green (active)
+    Metallic: 0.0
+    Roughness: 1.0
   Nwell:
-    color: [0.10, 0.30, 0.90, 0.65]      # Deep blue
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.30, 0.90, 0.65]      # Deep blue
+    Metallic: 0.0
+    Roughness: 1.0
   Poly2:
-    color: [0.95, 0.08, 0.08, 0.95]      # Vivid red (gate)
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.95, 0.08, 0.08, 0.95]      # Vivid red (gate)
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Contacts & vias - bright white
   Contact:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   Via1:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   Via2:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   Via3:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   Via4:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   Via5:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Metal layers - vivid rainbow spectrum (Blue → Violet → Red → Orange → Yellow → Gold)
   Metal1:
-    color: [0.15, 0.40, 1.0, 1.0]        # Blue
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.15, 0.40, 1.0, 1.0]        # Blue
+    Metallic: 0.0
+    Roughness: 1.0
   Metal2:
-    color: [0.55, 0.10, 1.0, 1.0]        # Violet
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.55, 0.10, 1.0, 1.0]        # Violet
+    Metallic: 0.0
+    Roughness: 1.0
   Metal3:
-    color: [1.0, 0.08, 0.08, 1.0]        # Red
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.08, 0.08, 1.0]        # Red
+    Metallic: 0.0
+    Roughness: 1.0
   Metal4:
-    color: [1.0, 0.52, 0.05, 1.0]        # Orange
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.52, 0.05, 1.0]        # Orange
+    Metallic: 0.0
+    Roughness: 1.0
   Metal5:
-    color: [1.0, 0.95, 0.05, 1.0]        # Yellow
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.95, 0.05, 1.0]        # Yellow
+    Metallic: 0.0
+    Roughness: 1.0
   MetalTop:
-    color: [1.0, 0.78, 0.10, 1.0]        # Gold (bond-pad layer)
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.78, 0.10, 1.0]        # Gold (bond-pad layer)
+    Metallic: 0.0
+    Roughness: 1.0

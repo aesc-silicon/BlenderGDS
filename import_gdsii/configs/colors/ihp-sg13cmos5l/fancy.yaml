@@ -7,101 +7,101 @@ description: Fancy color scheme - vivid flat aesthetic
 layers:
   # Active regions - bright green
   Activ:
-    color: [0.10, 0.95, 0.25, 0.90]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.95, 0.25, 0.90]
+    Metallic: 0.0
+    Roughness: 1.0
   ActivFiller:
-    color: [0.10, 0.95, 0.25, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.95, 0.25, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Gate poly - vivid red
   GatPoly:
-    color: [0.95, 0.08, 0.08, 0.95]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.95, 0.08, 0.08, 0.95]
+    Metallic: 0.0
+    Roughness: 1.0
   GatPolyFiller:
-    color: [0.95, 0.08, 0.08, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.95, 0.08, 0.08, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # NWell - deep blue
   NWell:
-    color: [0.10, 0.30, 0.90, 0.65]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.10, 0.30, 0.90, 0.65]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Contacts - bright white (neutral metal plugs)
   Cont:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Metal layers - vivid rainbow spectrum (Blue → Violet → Red → Yellow → Gold)
   Metal1:
-    color: [0.15, 0.40, 1.0, 1.0]        # Blue
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.15, 0.40, 1.0, 1.0]        # Blue
+    Metallic: 0.0
+    Roughness: 1.0
   Metal1Filler:
-    color: [0.15, 0.40, 1.0, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.15, 0.40, 1.0, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Via - bright white
   Via1:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   Metal2:
-    color: [0.55, 0.10, 1.0, 1.0]        # Violet (between Blue and Red)
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.55, 0.10, 1.0, 1.0]        # Violet (between Blue and Red)
+    Metallic: 0.0
+    Roughness: 1.0
   Metal2Filler:
-    color: [0.55, 0.10, 1.0, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [0.55, 0.10, 1.0, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   Via2:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   Metal3:
-    color: [1.0, 0.08, 0.08, 1.0]        # Red
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.08, 0.08, 1.0]        # Red
+    Metallic: 0.0
+    Roughness: 1.0
   Metal3Filler:
-    color: [1.0, 0.08, 0.08, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.08, 0.08, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   Via3:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   Metal4:
-    color: [1.0, 0.95, 0.05, 1.0]        # Yellow
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.95, 0.05, 1.0]        # Yellow
+    Metallic: 0.0
+    Roughness: 1.0
   Metal4Filler:
-    color: [1.0, 0.95, 0.05, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.95, 0.05, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Top via - bright white
   TopVia1:
-    color: [1.0, 1.0, 1.0, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 1.0, 1.0, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
 
   # Top metal - gold (bond-pad layer, visually distinct)
   TopMetal1:
-    color: [1.0, 0.78, 0.10, 1.0]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.78, 0.10, 1.0]
+    Metallic: 0.0
+    Roughness: 1.0
   TopMetal1Filler:
-    color: [1.0, 0.78, 0.10, 0.35]
-    metallic: 0.0
-    roughness: 1.0
+    Base Color: [1.0, 0.78, 0.10, 0.35]
+    Metallic: 0.0
+    Roughness: 1.0

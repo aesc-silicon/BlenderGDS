@@ -142,6 +142,7 @@ Each layer requires:
 ### Color Schema Configuration
 
 Color schemas are defined in YAML format and control the material appearance of each layer.
+Each color schema will define a Principled BSDF, and its fields can be customized here.
 
 **Schema file structure:**
 
@@ -150,19 +151,47 @@ name: Realistic
 description: Realistic color scheme
 layers:
   Metal1:
-    color: [0.63, 0.64, 0.65, 1.0]
-    metallic: 0.8
-    roughness: 0.3
+    Base Color: [0.63, 0.64, 0.65, 1.0]
+    Metallic: 0.8
+    Roughness: 0.3
 
   NWell:
-    color: [0.30, 0.45, 0.55, 0.65]
+    Base Color: [0.30, 0.45, 0.55, 0.65]
 ```
 
-Each layer entry supports:
+Each layer entry supports any of the Principled BSDF fields:
 
-* `color`: RGBA tuple with values in the range `[0.0, 1.0]`. The fourth component is the alpha (opacity).
-* `metallic` *(optional)*: Metallic factor from `0.0` (dielectric) to `1.0` (fully metallic). Defaults to `0.0`.
-* `roughness` *(optional)*: Surface roughness from `0.0` (mirror) to `1.0` (fully diffuse). Defaults to `0.5`.
+* `Base Color`            [RGBA]
+* `Metallic`              [VALUE]
+* `Roughness`             [VALUE]
+* `IOR`                   [VALUE]
+* `Alpha`                 [VALUE]
+* `Weight`                [VALUE]
+* `Diffuse Roughness`     [VALUE]
+* `Subsurface Type`       [BURLEY|RANDOM_WALK|RANDOM_WALK_SKIN]
+* `Subsurface Weight`     [VALUE]
+* `Subsurface Scale`      [VALUE]
+* `Subsurface IOR`        [VALUE]
+* `Subsurface Anisotropy` [VALUE]
+* `Specular Type`         [GGX|MULTI_GGX]
+* `Specular IOR Level`    [VALUE]
+* `Specular Tint`         [RGBA]
+* `Anisotropic`           [VALUE]
+* `Anisotropic Rotation`  [VALUE]
+* `Transmission Weight`   [VALUE]
+* `Coat Weight`           [VALUE]
+* `Coat Roughness`        [VALUE]
+* `Coat IOR`              [VALUE]
+* `Coat Tint`             [RGBA]
+* `Sheen Weight`          [VALUE]
+* `Sheen Roughness`       [VALUE]
+* `Sheen Tint`            [RGBA]
+* `Emission Color`        [RGBA]
+* `Emission Strength`     [VALUE]
+* `Thin Film Thickness`   [VALUE]
+* `Thin Film IOR`         [VALUE]
+
+Consult a Principled BSDF node for details of each field.
 
 Layers not listed in the schema are rendered with a default grey material.
 

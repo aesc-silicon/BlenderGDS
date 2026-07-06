@@ -198,14 +198,31 @@ def create_material(name, color):
     # Create nodes
     node_bsdf = nodes.new(type='ShaderNodeBsdfPrincipled')
     node_output = nodes.new(type='ShaderNodeOutputMaterial')
+    node_output.location = (400.0, 0.0)
 
     # Set color and properties
-    node_bsdf.inputs['Base Color'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])
-    node_bsdf.inputs['Metallic'].default_value = color.get('metallic', 0.1)
-    node_bsdf.inputs['Roughness'].default_value = color.get('roughness', 0.5)
+    for key,value in color.items():
+        # Try using Blender's input names
+        if key in node_bsdf.inputs:
+            node_bsdf.inputs[key].default_value = value
+            if key == "Base Color" and len(value)>3 and not "Alpha" in color:
+                # Copy alpha channel of "Base Color" to "Alpha" property if not explicitly set
+                node_bsdf.inputs["Alpha"].default_value = value[3]
 
-    if 'Alpha' in node_bsdf.inputs:
-        node_bsdf.inputs['Alpha'].default_value = color.get('color', [1.0, 1.0, 1.0, 1.0])[-1]
+        elif key == "Specular Type":
+            # Handle exceptional property
+            try:
+                node_bsdf.distribution = value
+            except:
+                print(f"Unknown Specular Type: {value}")
+        elif key == "Subsurface Type":
+            # Handle exceptional property
+            try:
+                node_bsdf.subsurface_method = value
+            except:
+                print(f"Unknown Subsurface Type: {value}")
+        else:
+            print(f"Unknown input name: {key}")
 
     # Link nodes
     mat.node_tree.links.new(node_bsdf.outputs['BSDF'], node_output.inputs['Surface'])
