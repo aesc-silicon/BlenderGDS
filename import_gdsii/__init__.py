@@ -61,7 +61,7 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
         if "order" not in pdks[key]:
             pdks[key]["order"] = 0
         if "def_color" not in pdks[key]:
-            pdks[key]["def_color"] = "realistic" # Should be None
+            pdks[key]["def_color"] = ""
 
     # Return sorted "pdks" dictionary by "order" and then alphabetically
     return dict(sorted(
@@ -423,7 +423,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             config_file = addon_dir / pdk_info['config_path']
             if config_file.exists():
                 self.custom_config_path = str(config_file)
-            if pdk_info["def_color"] is None:
+            if pdk_info["def_color"] == "":
                 return
             default_color = addon_dir / pdk_info['color_path'] / f"{pdk_info['def_color']}.yaml"
             if default_color.exists():
