@@ -629,8 +629,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 # Use built-in PDK config
                 pdk_info = PDK_CONFIGS.get(pdk_selection, {})
                 addon_dir = Path(__file__).parent
-                yamlfile = addon_dir / pdk_info.get('config_path', 'configs/'+
-                pdk_info["file_name"]+'.yaml')
+                yamlfile = addon_dir / pdk_info.get('config_path', f"configs/{pdk_info["file_name"]}.yaml")
 
             # Load layer stack configuration
             if not yamlfile.is_file():
@@ -680,7 +679,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             if use_custom:
                 colorfile = Path(custom_color_path)
             else:
-                color_dir = addon_dir / pdk_info.get('color_path', 'configs/colors/'+pdk_info["file_name"])
+                color_dir = addon_dir / pdk_info.get('color_path', f"configs/colors/{pdk_info["file_name"]}")
                 colorfile = color_dir / f"{self.color_scheme}.yaml"
             if not colorfile.is_file():
                 self.report({'ERROR'}, f"Color schema file not found: {colorfile}")
