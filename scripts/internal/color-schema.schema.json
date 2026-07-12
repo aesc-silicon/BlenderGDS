@@ -64,7 +64,7 @@
         "Subsurface IOR":        {"$ref": "#/definitions/value"},
         "Subsurface Anisotropy": {"$ref": "#/definitions/value"},
         "Specular Type":         {
-          "$ref": "string",
+          "type": "string",
           "description": "Specular distribution method.",
           "enum": [
             "GGX", "MULTI_GGX"

@@ -180,8 +180,10 @@ def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
 def create_material(name, color):
     """Create a material with given color"""
     mat = bpy.data.materials.get(name)
-    if mat is None:
-        mat = bpy.data.materials.new(name=name)
+    if mat is not None:
+        return mat
+    # Create new material
+    mat = bpy.data.materials.new(name=name)
 
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
@@ -243,7 +245,7 @@ def _create_merged_gds(gds_path, layerstack, tmp_dir):
     return merged_path
 
 
-def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=1e-6, crop_box=None, offset=None):
+def create_extruded_layer(report, gds_path, z, height, layer, name, color, mat_name=None, unit=1e-6, crop_box=None, offset=None):
     """Create extruded geometry for a specific GDS layer"""
     # Read and filter GDS
     library = gdstk.read_gds(gds_path, unit=unit, filter={layer})
@@ -320,7 +322,7 @@ def create_extruded_layer(report, gds_path, z, height, layer, name, color, unit=
     bpy.context.collection.objects.link(obj)
 
     # Apply material
-    mat = create_material(f"Mat_{name}", color)
+    mat = create_material(name if mat_name is None else mat_name, color)
     if obj.data.materials:
         obj.data.materials[0] = mat
     else:
@@ -697,6 +699,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     continue
 
                 layer_cfg = color_file.get('layers', {}).get(layer_name, {})
+                mat_name = None
+                if isinstance(layer_cfg, str):
+                    mat_name = layer_cfg
+                    layer_cfg = color_file.get('materials', {}).get(layer_cfg, {})
                 obj = create_extruded_layer(
                     self.report,
                     gds_path,
@@ -705,6 +711,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     layer_index,
                     layer_name,
                     layer_cfg,
+                    mat_name=mat_name,
                     unit=self.unit_scale,
                     crop_box=crop_box,
                     offset=crop_offset,
