@@ -32,16 +32,15 @@ import yaml
 # PDK Configuration paths
 def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
     pdks = {}
-    yaml_files = [
-        f for f in os.listdir(configs_dir)
-        if f.endswith('.yaml') and os.path.isfile(configs_dir / f)
-    ]
 
-    for yaml_file in yaml_files:
-        file_name = yaml_file[:-5]
-        key = file_name.upper().replace('-', '_')
+    for config_path in configs_dir.iterdir():
+        if not(config_path.is_file() and
+               config_path.suffix.lower() in [".yaml, .yml"]):
+            continue
+        
+        file_name = config_path.stem
+        key = file_name.upper().replace('-', '_') # Expected key format
 
-        config_path = configs_dir / yaml_file
         with open(config_path) as f:
             config = yaml.safe_load(f)
 
@@ -51,17 +50,12 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
             'file_name': file_name,
         }
         if "pdk_config" in config:
-            # name, description, order, def_color
+            # name, description, def_color
             pdks[key].update(**config["pdk_config"])
-        # Fill in defaults if not set
-        if "name" not in pdks[key]:
-            pdks[key]["name"] = key
-        if "description" not in pdks[key]:
-            pdks[key]["description"] = key
-        if "order" not in pdks[key]:
-            pdks[key]["order"] = 0
-        if "def_color" not in pdks[key]:
-            pdks[key]["def_color"] = ""
+        
+        pdks[key].setdefault("name", key)
+        pdks[key].setdefault("description", key)
+        pdks[key].setdefault("def_color", "")
 
     # Return sorted "pdks" dictionary by "order" and then alphabetically
     return dict(sorted(
@@ -240,7 +234,6 @@ def _create_merged_gds(gds_path, layerstack, tmp_dir):
     merged_layout.dbu = layout.dbu
     merged_top_cell = merged_layout.create_cell(top_cell.name)
 
-    print("layerstack",layerstack)
     for layer_name, data in layerstack.items():
         if layer_name=="pdk_config":
             continue
