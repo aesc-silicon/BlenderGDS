@@ -5,7 +5,6 @@
 pdk_config:
   name: IHP Open PDK SG13CMOS5L
   description: IHP SG13CMOS5L 130nm CMOS5L process
-  order: 2
   def_color: realistic
 
 Activ:

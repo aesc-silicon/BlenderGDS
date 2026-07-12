@@ -32,6 +32,7 @@ import yaml
 # PDK Configuration paths
 def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
     pdks = {}
+    pdk_order = None
 
     for config_path in configs_dir.iterdir():
         if not(config_path.is_file() and
@@ -39,6 +40,13 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
             continue
         
         file_name = config_path.stem
+
+        # Get pdk_order
+        if file_name == "_config_order":
+            with open(config_path) as f:
+                pdk_order = yaml.safe_load(f)
+            continue
+
         key = file_name.upper().replace('-', '_') # Expected key format
 
         with open(config_path) as f:
@@ -57,11 +65,22 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
         pdks[key].setdefault("description", key)
         pdks[key].setdefault("def_color", "")
 
-    # Return sorted "pdks" dictionary by "order" and then alphabetically
-    return dict(sorted(
-        pdks.items(),
-        key=lambda kv: (kv[1]["order"], kv[0])
-    ))
+    # Sort "pdks" dictionary
+    if pdk_order is None:
+        return dict(sorted(pdks.items()))
+    
+    sorted_pdks = {}
+    for item in pdk_order:
+        if item=="_": # Get all pdks not listed in pdk_order
+            remaining = {
+                k: v
+                for k, v in pdks.items()
+                if k not in pdk_order
+            }
+            sorted_pdks.update(dict(sorted(remaining.items())))
+        elif item in pdks:
+            sorted_pdks[item] = pdks[item]
+    return sorted_pdks
 
 PDK_CONFIGS = load_pdk_configs()
 

@@ -5,7 +5,6 @@
 pdk_config:
   name: GlobalFoundries GF180MCU PDK
   description: GlobalFoundries GF180MCU 180nm process
-  order: 4
   def_color: realistic
 
 Comp:

@@ -5,7 +5,6 @@
 pdk_config:
   name: IHP Open PDK SG13G2
   description: IHP SG13G2 130nm BiCMOS process
-  order: 1
   def_color: realistic
 
 Activ:

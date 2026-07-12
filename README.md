@@ -139,7 +139,6 @@ An optional field with metadata can be added to customize Blender's behavior whe
 pdk_config:
   name: SkyWater SKY130 PDK
   description: SkyWater SKY130 130nm process
-  order: 3
   def_color: realistic
 ```
 

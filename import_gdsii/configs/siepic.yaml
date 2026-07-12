@@ -10,7 +10,6 @@
 pdk_config:
   name: SiEPIC EBeam PDK
   description: SiEPIC EBeam silicon photonics PDK (220 nm SOI)
-  order: 5
   def_color: realistic
 
 # 220 nm patterned silicon waveguide layer
