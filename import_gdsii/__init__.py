@@ -36,7 +36,7 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
 
     for config_path in configs_dir.iterdir():
         if not(config_path.is_file() and
-               config_path.suffix.lower() in [".yaml, .yml"]):
+               config_path.suffix.lower() in [".yaml", ".yml"]):
             continue
         
         file_name = config_path.stem
@@ -64,7 +64,6 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
         pdks[key].setdefault("name", key)
         pdks[key].setdefault("description", key)
         pdks[key].setdefault("def_color", "")
-
     # Sort "pdks" dictionary
     if pdk_order is None:
         return dict(sorted(pdks.items()))
@@ -78,7 +77,7 @@ def load_pdk_configs(configs_dir=Path(__file__).parent / "configs"):
                 if k not in pdk_order
             }
             sorted_pdks.update(dict(sorted(remaining.items())))
-        elif item in pdks:
+        elif item in pdks.keys():
             sorted_pdks[item] = pdks[item]
     return sorted_pdks
 

@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PDK Order",
+  "description": "Schema for validating PDK order YAML files with array of names inside",
+  "type": "array",
+  "items": {
+    "type": "string"
+  }
+}

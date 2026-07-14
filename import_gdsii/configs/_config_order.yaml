@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2025 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+- _
+- ihp-sg13g2
+- ihp-sg13cmos5l
+- sky130
+- gf180mcu
+- siepic
+- lnoi400

@@ -11,6 +11,9 @@ with open(script_dir / 'layer-config.schema.json', encoding='utf-8') as f:
 with open(script_dir / 'color-schema.schema.json', encoding='utf-8') as f:
     color_schema = json.load(f)
 
+with open(script_dir / 'pdk-order.schema.json', encoding='utf-8') as f:
+    order_schema = json.load(f)
+
 
 project_dir = script_dir.parent.parent
 pdks = project_dir / "import_gdsii/configs"
@@ -18,6 +21,10 @@ for process in pdks.glob('*yaml'):
     print(f"Found process: {process.stem}")
 
     pdk_file = yaml.safe_load(process.read_text(encoding='utf-8'))
+    if process.name == "_config_order.yaml":
+        validate(pdk_file, order_schema)
+        continue
+    
     validate(pdk_file, pdk_schema)
     pdk_layers = set(key for key in pdk_file.keys() if not key=="pdk_config")
 
