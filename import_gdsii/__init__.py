@@ -29,39 +29,82 @@ import yaml
 # PDK DEFINITIONS
 # ============================================================================
 
-# PDK Configuration paths
-PDK_CONFIGS = {
-    'IHP_SG13G2': {
-        'name': 'IHP Open PDK (SG13G2)',
-        'config_path': 'configs/ihp-sg13g2.yaml',
-        'color_path': 'configs/colors/ihp-sg13g2/'
-    },
-    'IHP_SG13CMOS5L': {
-        'name': 'IHP Open PDK (SG13CMOS5L)',
-        'config_path': 'configs/ihp-sg13cmos5l.yaml',
-        'color_path': 'configs/colors/ihp-sg13cmos5l/'
-    },
-    'SKY130': {
-        'name': 'SkyWater SKY130 PDK',
-        'config_path': 'configs/sky130.yaml',
-        'color_path': 'configs/colors/sky130/'
-    },
-    'GF180MCU': {
-        'name': 'GlobalFoundries GF180MCU PDK',
-        'config_path': 'configs/gf180mcu.yaml',
-        'color_path': 'configs/colors/gf180mcu/'
-    },
-    'SIEPIC_EBEAM': {
-        'name': 'SiEPIC EBeam PDK',
-        'config_path': 'configs/siepic.yaml',
-        'color_path': 'configs/colors/siepic/'
-    },
-    'LNOI400': {
-        'name': 'Luxtelligence LNOI400 PDK',
-        'config_path': 'configs/lnoi400.yaml',
-        'color_path': 'configs/colors/lnoi400/'
-    },
-}
+# Directory holding the PDK layer stacks and their color schemes
+CONFIGS_DIR = Path(__file__).parent / "configs"
+
+# Config file listing the PDKs in the order they appear in the user interface
+PDK_ORDER_FILE = "_config_order"
+
+# PDK configs read from CONFIGS_DIR, refreshed whenever the import dialog opens
+_pdk_configs = {}
+
+
+def _pdk_key(file_name):
+    """Convert a config file name into the identifier used for its PDK"""
+    return file_name.upper().replace('-', '_')
+
+
+def _sort_pdk_configs(pdks, order):
+    """Sort PDKs as listed in the order file
+
+    Entries are config file names. PDKs missing from the list are appended
+    in alphabetical order.
+    """
+    sorted_pdks = {}
+    for entry in order:
+        key = _pdk_key(entry)
+        if key in pdks:
+            sorted_pdks[key] = pdks[key]
+    sorted_pdks.update({key: pdks[key] for key in sorted(pdks)
+                        if key not in sorted_pdks})
+
+    return sorted_pdks
+
+
+def load_pdk_configs(configs_dir=CONFIGS_DIR):
+    """Read all PDK configs from configs_dir and cache them"""
+    global _pdk_configs
+
+    pdks = {}
+    order = []
+    for config_path in sorted(configs_dir.iterdir()):
+        if not config_path.is_file() or config_path.suffix.lower() not in ('.yaml', '.yml'):
+            continue
+
+        try:
+            config = yaml.safe_load(config_path.read_text(encoding='utf-8'))
+        except yaml.YAMLError as error:
+            print(f"⚠ Ignoring malformed config {config_path.name}: {error}")
+            continue
+
+        if config_path.stem == PDK_ORDER_FILE:
+            order = config or []
+            continue
+
+        if not isinstance(config, dict):
+            print(f"⚠ Ignoring config without layers: {config_path.name}")
+            continue
+
+        # Optional metadata describing the PDK itself instead of one of its layers
+        metadata = config.get('pdk_config') or {}
+        key = _pdk_key(config_path.stem)
+        pdks[key] = {
+            'config_path': config_path,
+            'color_path': configs_dir / 'colors' / config_path.stem,
+            'name': metadata.get('name', key),
+            'description': metadata.get('description', key),
+            'def_color': metadata.get('def_color', ''),
+        }
+
+    _pdk_configs = _sort_pdk_configs(pdks, order)
+    return _pdk_configs
+
+
+def get_pdk_configs():
+    """Return the known PDK configs and read them from disk on first use"""
+    if not _pdk_configs:
+        load_pdk_configs()
+    return _pdk_configs
 
 
 # ============================================================================
@@ -337,21 +380,30 @@ def create_extruded_layer(report, gds_path, z, height, layer, name, color, mat_n
 # PRE-IMPORT PDK SELECTION DIALOG
 # ============================================================================
 
+def get_pdk_list(self, context):
+    """Dynamically generate PDK list based on the available configs"""
+    return [(key, pdk['name'], pdk['description'])
+            for key, pdk in get_pdk_configs().items()]
+
+
 def get_color_schemes(self, context):
     """Dynamically generate color scheme list based on selected PDK"""
-    items = []
+    pdk_configs = get_pdk_configs()
+    pdk = getattr(context.scene, 'gdsii_pdk_selection', next(iter(pdk_configs), ''))
+    pdk_info = pdk_configs.get(pdk)
+    if pdk_info is None:
+        return []
 
-    pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
-    addon_dir = Path(__file__).parent
-    color_path = addon_dir / PDK_CONFIGS.get(pdk, {}).get('color_path', pdk)
-    schemes = [('realistic', 'Realistic', 'Realistic color scheme')]
-    for file in color_path.glob('*yaml'):
-        # Make sure realistic is the default choice
-        if file.stem == 'realistic':
-            continue
+    schemes = []
+    for file in sorted(pdk_info['color_path'].glob('*.yaml')):
         color_file = yaml.safe_load(file.read_text(encoding='utf-8'))
-        schemes.append((file.stem, color_file.get('name', file.stem),
-                       color_file.get('description', file.stem)))
+        scheme = (file.stem, color_file.get('name', file.stem),
+                  color_file.get('description', file.stem))
+        # Make sure the PDK's default scheme is the first choice
+        if file.stem == pdk_info['def_color']:
+            schemes.insert(0, scheme)
+        else:
+            schemes.append(scheme)
     return schemes
 
 
@@ -364,15 +416,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
     pdk_selection: EnumProperty(
         name="PDK",
         description="Process Design Kit to use for layer stack",
-        items=[
-            ('IHP_SG13G2', "IHP Open PDK SG13G2", "IHP SG13G2 130nm BiCMOS process"),
-            ('IHP_SG13CMOS5L', "IHP Open PDK SG13CMOS5L", "IHP SG13CMOS5L 130nm CMOS5L process"),
-            ('SKY130', "SkyWater SKY130 PDK", "SkyWater SKY130 130nm process"),
-            ('GF180MCU', "GlobalFoundries GF180MCU PDK", "GlobalFoundries GF180MCU 180nm process"),
-            ('SIEPIC_EBEAM', "SiEPIC EBeam PDK", "SiEPIC EBeam silicon photonics PDK (220 nm SOI)"),
-            ('LNOI400', "Luxtelligence LNOI400 PDK", "Luxtelligence LNOI400 thin-film lithium niobate (X-cut, 400 nm LN, 200 nm etch) photonics PDK"),
-        ],
-        default='IHP_SG13G2',
+        items=get_pdk_list,
     )
 
     use_custom_config: BoolProperty(
@@ -396,22 +440,25 @@ class GDSIIPreImportDialog(bpy.types.Operator):
     )
 
     def invoke(self, context, event):
+        # Pick up PDKs added since the last import
+        load_pdk_configs()
         # Set default config path based on PDK selection
         self.update_config_path()
         return context.window_manager.invoke_props_dialog(self, width=400)
 
     def update_config_path(self):
         """Update config path based on selected PDK"""
-        if not self.use_custom_config and self.pdk_selection in PDK_CONFIGS:
-            pdk_info = PDK_CONFIGS[self.pdk_selection]
-            # Try to find config relative to add-on directory
-            addon_dir = Path(__file__).parent
-            config_file = addon_dir / pdk_info['config_path']
-            if config_file.exists():
-                self.custom_config_path = str(config_file)
-            default_color = addon_dir / pdk_info['color_path'] / 'realistic.yaml'
-            if default_color.exists():
-                self.custom_color_path = str(default_color)
+        pdk_info = get_pdk_configs().get(self.pdk_selection)
+        if self.use_custom_config or pdk_info is None:
+            return
+
+        if pdk_info['config_path'].exists():
+            self.custom_config_path = str(pdk_info['config_path'])
+        if not pdk_info['def_color']:
+            return
+        default_color = pdk_info['color_path'] / f"{pdk_info['def_color']}.yaml"
+        if default_color.exists():
+            self.custom_color_path = str(default_color)
 
     def draw(self, context):
         layout = self.layout
@@ -435,8 +482,9 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             if not Path(self.custom_config_path).is_file() or not Path(self.custom_color_path).is_file():
                 box.label(text="Fix highlighted paths before importing", icon='ERROR')
         else:
-            pdk_info = PDK_CONFIGS.get(self.pdk_selection, {})
-            box.label(text=f"Using: {pdk_info.get('config_path', 'N/A')}", icon='INFO')
+            pdk_info = get_pdk_configs().get(self.pdk_selection, {})
+            config_path = pdk_info.get('config_path')
+            box.label(text=f"Using: {config_path.name if config_path else 'N/A'}", icon='INFO')
 
     def execute(self, context):
         # Store PDK settings in scene for the importer to use
@@ -595,8 +643,9 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box = layout.box()
         box.label(text="Selected PDK:", icon='PRESET')
         if not use_custom:
-            pdk = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
-            pdk_name = PDK_CONFIGS.get(pdk, {}).get('name', pdk)
+            pdk_configs = get_pdk_configs()
+            pdk = getattr(context.scene, 'gdsii_pdk_selection', next(iter(pdk_configs), ''))
+            pdk_name = pdk_configs.get(pdk, {}).get('name', pdk)
         else:
             pdk_name = "Custom"
         box.label(text=pdk_name)
@@ -608,7 +657,9 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         """Main import function"""
         try:
             # Get PDK settings from scene
-            pdk_selection = getattr(context.scene, 'gdsii_pdk_selection', 'IHP_SG13G2')
+            pdk_configs = get_pdk_configs()
+            pdk_selection = getattr(context.scene, 'gdsii_pdk_selection',
+                                    next(iter(pdk_configs), ''))
             use_custom = getattr(context.scene, 'gdsii_use_custom_config', False)
             custom_config_path = getattr(context.scene, 'gdsii_custom_config_path', '')
             custom_color_path = getattr(context.scene, 'gdsii_custom_color_path', '')
@@ -618,9 +669,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 yamlfile = Path(custom_config_path)
             else:
                 # Use built-in PDK config
-                pdk_info = PDK_CONFIGS.get(pdk_selection, {})
-                addon_dir = Path(__file__).parent
-                yamlfile = addon_dir / pdk_info.get('config_path', 'configs/ihp-sg13g2.yaml')
+                pdk_info = pdk_configs.get(pdk_selection)
+                if pdk_info is None:
+                    self.report({'ERROR'}, f"Unknown PDK: {pdk_selection}")
+                    return {'CANCELLED'}
+                yamlfile = pdk_info['config_path']
 
             # Load layer stack configuration
             if not yamlfile.is_file():
@@ -628,6 +681,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 return {'CANCELLED'}
 
             layerstack = yaml.safe_load(yamlfile.read_text(encoding='utf-8'))
+            # PDK metadata describes the file itself and is not a layer
+            layerstack.pop('pdk_config', None)
 
             # Setup crop box if enabled
             crop_box = None
@@ -666,12 +721,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             if self.setup_scene:
                 setup_chip_scene(bbox_min[0], bbox_min[1], bbox_max[0], bbox_max[1], collection)
 
-            addon_dir = Path(__file__).parent
             if use_custom:
                 colorfile = Path(custom_color_path)
             else:
-                color_dir = addon_dir / pdk_info.get('color_path', 'configs/colors/ihp-sg13g2')
-                colorfile = color_dir / f"{self.color_scheme}.yaml"
+                colorfile = pdk_info['color_path'] / f"{self.color_scheme}.yaml"
             if not colorfile.is_file():
                 self.report({'ERROR'}, f"Color schema file not found: {colorfile}")
                 return {'CANCELLED'}
@@ -750,7 +803,8 @@ def menu_func_import(self, context):
 
 # Properties to store PDK settings in scene
 def register_properties():
-    bpy.types.Scene.gdsii_pdk_selection = StringProperty(default='IHP_SG13G2')
+    bpy.types.Scene.gdsii_pdk_selection = StringProperty(
+        default=next(iter(get_pdk_configs()), ''))
     bpy.types.Scene.gdsii_use_custom_config = BoolProperty(default=False)
     bpy.types.Scene.gdsii_custom_config_path = StringProperty(default='')
     bpy.types.Scene.gdsii_custom_color_path = StringProperty(default='')
