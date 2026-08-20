@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2025 aesc silicon
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# PDKs in the order they appear in Blender. Config files missing from this
+# list are appended in alphabetical order.
+- ihp-sg13g2
+- ihp-sg13cmos5l
+- sky130
+- gf180mcu
+- siepic
+- lnoi400

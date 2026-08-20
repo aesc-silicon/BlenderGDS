@@ -2,6 +2,11 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+pdk_config:
+  name: GlobalFoundries GF180MCU PDK
+  description: GlobalFoundries GF180MCU 180nm process
+  def_color: realistic
+
 Comp:
   index: 22
   type: 0
