@@ -33,7 +33,7 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 
 ## Installation
 
-BlenderGDS requires **Blender 4.2 or later**. All Python dependencies (`gdstk`, `klayout`, `numpy`, `PyYAML`) are bundled inside the extension and installed automatically — no pip or terminal required.
+BlenderGDS requires **Blender 4.2 or later**. All Python dependencies (`klayout`, `numpy`, `PyYAML`) are bundled inside the extension and installed automatically — no pip or terminal required.
 
 ### Installing from Blender Extensions
 
