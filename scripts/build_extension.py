@@ -26,7 +26,7 @@ ADDON_DIR = REPO_DIR / "import_gdsii"
 WHEELS_DIR = ADDON_DIR / "wheels"
 MANIFEST_PATH = ADDON_DIR / "blender_manifest.toml"
 
-PACKAGES = ["gdstk", "klayout", "PyYAML"]
+PACKAGES = ["klayout", "PyYAML"]
 
 # Blender 4.2/4.3 uses Python 3.11, Blender 4.4+ uses Python 3.13.
 # Downloading wheels for both ensures compatibility across all supported versions.
