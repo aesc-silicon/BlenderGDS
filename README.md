@@ -139,6 +139,38 @@ Each layer requires:
 - `output_file` - Path for the merged output GDS file
 - `input.gds` - Input GDS file to process
 
+### PDK Configuration
+
+Every layer stack in `import_gdsii/configs` is offered as a PDK in Blender's import
+dialog. Dropping an additional YAML file into that directory, together with a color
+schema directory of the same name below `configs/colors`, is enough to add a custom
+PDK. It shows up the next time the import dialog is opened.
+
+An optional `pdk_config` section describes the PDK itself instead of one of its
+layers:
+
+```yaml
+pdk_config:
+  name: SkyWater SKY130 PDK
+  description: SkyWater SKY130 130nm process
+  def_color: realistic
+```
+
+All fields are optional:
+
+* `name` - Name shown in the PDK list. Defaults to the config file name
+* `description` - Tooltip shown for the PDK. Defaults to the config file name
+* `def_color` - Color schema pre-selected for this PDK. Defaults to the first
+  schema in alphabetical order
+
+`configs/_config_order.yaml` lists the config file names in the order they appear
+in the PDK list. Files missing from this list are appended in alphabetical order:
+
+```yaml
+- ihp-sg13g2
+- sky130
+```
+
 ### Color Schema Configuration
 
 Color schemas are defined in YAML format and control the material appearance of each layer.
