@@ -13,14 +13,14 @@ bl_info = {
     "category": "Import-Export",
 }
 
+import math
 import os
-import tempfile
 from pathlib import Path
 import bpy
+import bmesh
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
 import numpy as np
-import gdstk
 import klayout.db as db
 import yaml
 
@@ -267,102 +267,138 @@ def create_material(name, color):
     return mat
 
 
-def _create_merged_gds(gds_path, layerstack, tmp_dir):
-    """Merge all layers with KLayout and write the result to a GDS in tmp_dir."""
-    layout = db.Layout()
-    layout.read(str(gds_path))
-    top_cell = layout.top_cell()
+# KLayout prints polygons as "(x,y;x,y;...);(x,y;...)"
+_POLYGON_CHARS = str.maketrans({'(': None, ')': None, ';': ','})
 
-    merged_layout = db.Layout()
-    merged_layout.dbu = layout.dbu
-    merged_top_cell = merged_layout.create_cell(top_cell.name)
-
-    for data in layerstack.values():
-        layer = (data['index'], data['type'])
-        layer_index = layout.layer(*layer)
-        region = db.Region(top_cell.begin_shapes_rec(layer_index))
-        merged_top_cell.shapes(merged_layout.layer(*layer)).insert(region.merged())
-
-    merged_path = Path(tmp_dir) / "merged.gds"
-    merged_layout.write(str(merged_path))
-    return merged_path
+# Number of vertices above which a single layer slows down Blender noticeably
+VERTEX_WARN_LIMIT = 1000000
 
 
-def create_extruded_layer(report, gds_path, z, height, layer, name, color, mat_name=None, unit=1e-6, crop_box=None, offset=None):
+def _read_coordinates(text):
+    """Convert KLayout's polygon string into an array of integer coordinates"""
+    return np.fromstring(text.translate(_POLYGON_CHARS), sep=',',
+                         dtype=np.int64).reshape(-1, 2)
+
+
+def _triangles_to_mesh(region):
+    """Convert a region of triangles into welded vertices and triangle faces"""
+    text = region.to_s(-1)
+    if not text:
+        return np.empty((0, 2), dtype=np.int64), np.empty((0, 3), dtype=np.int64)
+
+    # Neighbouring triangles share their corners, so the vertices are welded
+    coords, inverse = np.unique(_read_coordinates(text), axis=0, return_inverse=True)
+    faces = inverse.reshape(-1, 3)
+
+    # A triangle whose corners fall onto the same vertex has no area
+    keep = ((faces[:, 0] != faces[:, 1]) & (faces[:, 1] != faces[:, 2])
+            & (faces[:, 0] != faces[:, 2]))
+    return coords, faces[keep]
+
+
+def _polygons_to_mesh(region):
+    """Convert a region of hole-free polygons into vertices and n-gon faces"""
+    text = region.to_s(-1)
+    if not text:
+        return np.empty((0, 2), dtype=np.int64), []
+
+    coords = _read_coordinates(text)
+    faces = []
+    start = 0
+    for polygon in text.split(');('):
+        end = start + polygon.count(';') + 1
+        faces.append(list(range(start, end)))
+        start = end
+    return coords, faces
+
+
+def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
+                          mat_name=None, unit=1e-6, crop_box=None, offset=None,
+                          merge=True):
     """Create extruded geometry for a specific GDS layer"""
-    # Read and filter GDS
-    library = gdstk.read_gds(gds_path, unit=unit, filter={layer})
+    dbu = layout.dbu * 1e-6 / unit
 
-    # Merge and flatten all top-level cells
-    merged_cell = gdstk.Cell("MERGED")
-    for cell in library.top_level():
-        flattened = cell.flatten()
+    # Collect the layer from all top cells, including their sub cells
+    region = db.Region()
+    layer_index = layout.layer(*layer)
+    for cell in top_cells:
+        region.insert(cell.begin_shapes_rec(layer_index))
 
-        # Add polygons
-        merged_cell.add(*flattened.polygons)
-
-        # Convert paths to polygons
-        for path in flattened.paths:
-            merged_cell.add(*path.to_polygons())
-
-    # Apply crop if specified
     if crop_box is not None:
         x_min, y_min, x_max, y_max = crop_box
-        crop_rect = gdstk.rectangle((x_min, y_min), (x_max, y_max))
+        region &= db.Region(db.Box(
+            math.floor(x_min / dbu),
+            math.floor(y_min / dbu),
+            math.ceil(x_max / dbu),
+            math.ceil(y_max / dbu),
+        ))
 
-        # Filter polygons that intersect with crop region
-        cropped_polygons = []
-        for polygon in merged_cell.polygons:
-            # Use boolean AND operation to get intersection
-            result = gdstk.boolean(polygon, crop_rect, "and")
-            cropped_polygons.extend(result)
+    # Merging avoids overlapping faces, which Cycles renders as artifacts.
+    # Without it the polygons have to be taken as they are in the GDS, since
+    # KLayout otherwise merges them on the fly for every operation below.
+    if merge:
+        region.merge()
+    else:
+        region.merged_semantics = False
 
-        # Replace with cropped polygons
-        merged_cell = gdstk.Cell("MERGED")
-        merged_cell.add(*cropped_polygons)
-
-    polygon_count = len(merged_cell.polygons)
+    polygon_count = region.count()
     if polygon_count == 0:
         print(f"⚠ Layer {name}: No geometry found")
         return None
 
-    # Pre-allocate arrays for better performance
-    all_verts = []
-    all_faces = []
-    v_offset = 0
+    # Blender cannot fill a face with a hole, so KLayout triangulates those
+    # polygons. All others are kept as they are and triangulated further down.
+    tri_coords, tri_faces = _triangles_to_mesh(region.with_holes(0, True).delaunay())
+    poly_coords, poly_faces = _polygons_to_mesh(region.with_holes(0, False))
 
-    for polygon in merged_cell.polygons:
-        points = polygon.points
-        if offset is not None:
-            points = points - np.array(offset)
-        n = len(points)
+    coords = np.concatenate((tri_coords, poly_coords))
+    if offset is not None:
+        coords = coords - np.array([round(offset[0] / dbu), round(offset[1] / dbu)])
 
-        if n < 3:
-            continue
+    verts = np.empty((len(coords), 3), dtype=np.float64)
+    verts[:, :2] = coords * dbu
+    verts[:, 2] = z
 
-        # Build vertices
-        bottom = np.column_stack([points, np.full(n, z)])
-        top = np.column_stack([points, np.full(n, z + height)])
-        verts = np.vstack([bottom, top])
+    faces = tri_faces.tolist()
+    faces.extend([index + len(tri_coords) for index in face] for face in poly_faces)
 
-        all_verts.extend(verts.tolist())
+    if len(verts) > VERTEX_WARN_LIMIT:
+        report({'WARNING'}, f"{name}: {len(verts)} vertices may slow down Blender")
 
-        # Build faces
-        all_faces.append([v_offset + j for j in range(n)])
-        all_faces.append([v_offset + 2*n-1-j for j in range(n)])
-        all_faces.extend([[v_offset + j, v_offset + (j+1)%n, 
-                          v_offset + (j+1)%n + n, v_offset + j + n] 
-                         for j in range(n)])
-
-        v_offset += 2 * n
-
-    # Create mesh
+    # -----------------------------
+    # BUILD MESH
+    # -----------------------------
     mesh = bpy.data.meshes.new(name=f"M{name}")
-    mesh.from_pydata(all_verts, [], all_faces)
-    mesh.update()
+    mesh.from_pydata(verts.tolist(), [], faces)
+    if mesh.validate(verbose=False):
+        print(f"⚠ Layer {name}: Removed invalid geometry")
 
     obj = bpy.data.objects.new(name=f"L{name}", object_data=mesh)
     bpy.context.collection.objects.link(obj)
+
+    # -----------------------------
+    # EXTRUDE
+    # -----------------------------
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+
+    # Blender renders triangles and quads better than large n-gons
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    bmesh.ops.join_triangles(bm, faces=bm.faces[:],
+                             angle_face_threshold=math.pi / 4,
+                             angle_shape_threshold=math.pi)
+
+    extruded = bmesh.ops.extrude_face_region(bm, geom=bm.faces[:])
+    bmesh.ops.translate(
+        bm,
+        verts=[v for v in extruded['geom'] if isinstance(v, bmesh.types.BMVert)],
+        vec=(0, 0, height),
+    )
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+
+    bm.to_mesh(mesh)
+    bm.free()
+    mesh.update()
 
     # Apply material
     mat = create_material(name if mat_name is None else mat_name, color)
@@ -371,8 +407,8 @@ def create_extruded_layer(report, gds_path, z, height, layer, name, color, mat_n
     else:
         obj.data.materials.append(mat)
 
-    print(f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
-    report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(all_verts)} vertices")
+    print(f"✓ {name}: {polygon_count} polygons, {len(verts)} vertices")
+    report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(verts)} vertices")
     return obj
 
 
@@ -684,6 +720,15 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             # PDK metadata describes the file itself and is not a layer
             layerstack.pop('pdk_config', None)
 
+            # Read the layout once and extract every layer from it
+            gds_layout = db.Layout()
+            gds_layout.read(filepath)
+            top_cells = gds_layout.top_cells()
+            if not top_cells:
+                self.report({'ERROR'}, f"No cell found in {Path(filepath).name}")
+                return {'CANCELLED'}
+            dbu = gds_layout.dbu * 1e-6 / self.unit_scale
+
             # Setup crop box if enabled
             crop_box = None
             crop_offset = None
@@ -702,10 +747,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 print(f"Cropping to region: X={self.crop_x}, Y={self.crop_y}, W={self.crop_width}, H={self.crop_height}")
             else:
                 # Determine chip dimensions for scene setup
-                lib = gdstk.read_gds(filepath, unit=self.unit_scale)
-                bboxes = [c.bounding_box() for c in lib.top_level() if c.bounding_box() is not None]
-                bbox_min = (min(b[0][0] for b in bboxes), min(b[0][1] for b in bboxes))
-                bbox_max = (max(b[1][0] for b in bboxes), max(b[1][1] for b in bboxes))
+                bbox = db.Box()
+                for cell in top_cells:
+                    bbox += cell.bbox()
+                bbox_min = (bbox.left * dbu, bbox.bottom * dbu)
+                bbox_max = (bbox.right * dbu, bbox.top * dbu)
 
             # Create collection for imported layers
             collection = None
@@ -734,14 +780,6 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             print(f"Using PDK: {pdk_selection}")
             print(f"Layer stack config: {yamlfile}")
 
-            # Merge layers upfront with KLayout if requested
-            tmp_dir = None
-            gds_path = filepath
-            if self.merge_layers:
-                tmp_dir = tempfile.mkdtemp()
-                gds_path = str(_create_merged_gds(filepath, layerstack, tmp_dir))
-                print(f"Merged GDS written to: {gds_path}")
-
             # Import each layer from the stack
             imported_count = 0
             for layer_name, data in layerstack.items():
@@ -758,7 +796,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     layer_cfg = color_file.get('materials', {}).get(layer_cfg, {})
                 obj = create_extruded_layer(
                     self.report,
-                    gds_path,
+                    gds_layout,
+                    top_cells,
                     z,
                     height,
                     layer_index,
@@ -768,14 +807,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     unit=self.unit_scale,
                     crop_box=crop_box,
                     offset=crop_offset,
+                    merge=self.merge_layers,
                 )
 
                 if obj is not None:
                     imported_count += 1
-
-            if tmp_dir:
-                import shutil
-                shutil.rmtree(tmp_dir, ignore_errors=True)
 
             self.report({'INFO'}, f"Imported {imported_count} layers from {Path(filepath).name}")
             print(f"✓ Import complete! {imported_count} layers imported.")
