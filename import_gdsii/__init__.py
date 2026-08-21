@@ -274,10 +274,16 @@ _POLYGON_CHARS = str.maketrans({'(': None, ')': None, ';': ','})
 VERTEX_WARN_LIMIT = 1000000
 
 
-def _read_coordinates(text):
+def _read_coordinates(text, expected):
     """Convert KLayout's polygon string into an array of integer coordinates"""
-    return np.fromstring(text.translate(_POLYGON_CHARS), sep=',',
-                         dtype=np.int64).reshape(-1, 2)
+    coords = np.fromstring(text.translate(_POLYGON_CHARS), sep=',',
+                           dtype=np.int64)
+    # Older numpy versions only warn about a string they could not read to its
+    # end, which would silently cut the geometry short
+    if len(coords) != 2 * expected:
+        raise ValueError(f"Read {len(coords) // 2} of {expected} points from "
+                         "KLayout, the polygon list has an unexpected format")
+    return coords.reshape(-1, 2)
 
 
 def _triangles_to_mesh(region):
@@ -287,7 +293,8 @@ def _triangles_to_mesh(region):
         return np.empty((0, 2), dtype=np.int64), np.empty((0, 3), dtype=np.int64)
 
     # Neighbouring triangles share their corners, so the vertices are welded
-    coords, inverse = np.unique(_read_coordinates(text), axis=0, return_inverse=True)
+    points = _read_coordinates(text, 3 * (text.count(');(') + 1))
+    coords, inverse = np.unique(points, axis=0, return_inverse=True)
     faces = inverse.reshape(-1, 3)
 
     # A triangle whose corners fall onto the same vertex has no area
@@ -302,14 +309,13 @@ def _polygons_to_mesh(region):
     if not text:
         return np.empty((0, 2), dtype=np.int64), []
 
-    coords = _read_coordinates(text)
     faces = []
     start = 0
     for polygon in text.split(');('):
         end = start + polygon.count(';') + 1
         faces.append(list(range(start, end)))
         start = end
-    return coords, faces
+    return _read_coordinates(text, start), faces
 
 
 def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
@@ -323,6 +329,9 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
     layer_index = layout.layer(*layer)
     for cell in top_cells:
         region.insert(cell.begin_shapes_rec(layer_index))
+
+    # Net names and other shape properties end up in the polygon list below
+    region.remove_properties()
 
     if crop_box is not None:
         x_min, y_min, x_max, y_max = crop_box
