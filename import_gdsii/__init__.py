@@ -15,9 +15,9 @@ bl_info = {
 
 import math
 import os
+import bmesh
 from pathlib import Path
 import bpy
-import bmesh
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
 import numpy as np
@@ -273,11 +273,20 @@ _POLYGON_CHARS = str.maketrans({'(': None, ')': None, ';': ','})
 # Number of vertices above which a single layer slows down Blender noticeably
 VERTEX_WARN_LIMIT = 1000000
 
+# Number of corners above which Blender fills a face with overlapping triangles
+NGON_LIMIT = 64
 
-def _read_coordinates(text):
+
+def _read_coordinates(text, expected):
     """Convert KLayout's polygon string into an array of integer coordinates"""
-    return np.fromstring(text.translate(_POLYGON_CHARS), sep=',',
-                         dtype=np.int64).reshape(-1, 2)
+    coords = np.fromstring(text.translate(_POLYGON_CHARS), sep=',',
+                           dtype=np.int64)
+    # Older numpy versions only warn about a string they could not read to its
+    # end, which would silently cut the geometry short
+    if len(coords) != 2 * expected:
+        raise ValueError(f"Read {len(coords) // 2} of {expected} points from "
+                         "KLayout, the polygon list has an unexpected format")
+    return coords.reshape(-1, 2)
 
 
 def _triangles_to_mesh(region):
@@ -287,7 +296,8 @@ def _triangles_to_mesh(region):
         return np.empty((0, 2), dtype=np.int64), np.empty((0, 3), dtype=np.int64)
 
     # Neighbouring triangles share their corners, so the vertices are welded
-    coords, inverse = np.unique(_read_coordinates(text), axis=0, return_inverse=True)
+    points = _read_coordinates(text, 3 * (text.count(');(') + 1))
+    coords, inverse = np.unique(points, axis=0, return_inverse=True)
     faces = inverse.reshape(-1, 3)
 
     # A triangle whose corners fall onto the same vertex has no area
@@ -297,19 +307,113 @@ def _triangles_to_mesh(region):
 
 
 def _polygons_to_mesh(region):
-    """Convert a region of hole-free polygons into vertices and n-gon faces"""
+    """Convert a region of hole-free polygons into vertices and polygon sizes"""
     text = region.to_s(-1)
     if not text:
-        return np.empty((0, 2), dtype=np.int64), []
+        return np.empty((0, 2), dtype=np.int64), np.empty(0, dtype=np.int64)
 
-    coords = _read_coordinates(text)
-    faces = []
-    start = 0
-    for polygon in text.split(');('):
-        end = start + polygon.count(';') + 1
-        faces.append(list(range(start, end)))
-        start = end
-    return coords, faces
+    sizes = np.fromiter((polygon.count(';') + 1 for polygon in text.split(');(')),
+                        dtype=np.int64)
+    return _read_coordinates(text, int(sizes.sum())), sizes
+
+
+def _boundary_edges(triangles, poly_starts, poly_sizes, poly_offset, vertex_count):
+    """Collect the edges that only one face uses, walking each face clockwise"""
+    edges = []
+    if len(triangles):
+        following = np.roll(triangles, -1, axis=1)
+        directed = np.stack((triangles.ravel(), following.ravel()), axis=1)
+        # An edge between two triangles shows up twice, an outer edge only once
+        key = (np.minimum(directed[:, 0], directed[:, 1]).astype(np.int64) * vertex_count
+               + np.maximum(directed[:, 0], directed[:, 1]))
+        _, index, counts = np.unique(key, return_index=True, return_counts=True)
+        edges.append(directed[index[counts == 1]])
+
+    if len(poly_sizes):
+        # Merged polygons never share an edge, so all of their edges are outer ones
+        first = np.arange(poly_offset, poly_offset + int(poly_sizes.sum()))
+        following = first + 1
+        following[poly_starts + poly_sizes - 1] = poly_starts + poly_offset
+        edges.append(np.stack((first, following), axis=1))
+
+    if not edges:
+        return np.empty((0, 2), dtype=np.int64)
+    return np.concatenate(edges)
+
+
+def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
+    """Build the extruded solid of one layer without going through bmesh
+
+    The polygons are the bottom of the solid, a copy shifted by the layer
+    height is the top and every outer edge is closed with a wall.
+    """
+    count = len(coords)
+    points = coords * dbu
+
+    vertices = np.empty((2 * count, 3), dtype=np.float32)
+    vertices[:count, :2] = points
+    vertices[:count, 2] = z
+    vertices[count:, :2] = points
+    vertices[count:, 2] = z + height
+
+    poly_offset = len(coords) - int(poly_sizes.sum())
+    poly_starts = np.concatenate(
+        ([0], np.cumsum(poly_sizes)[:-1])).astype(np.int64) if len(poly_sizes) \
+        else np.empty(0, dtype=np.int64)
+    walls = _boundary_edges(triangles, poly_starts, poly_sizes, poly_offset, count)
+
+    # Bottom faces keep the clockwise order KLayout writes, so they face down,
+    # the top copy is reversed and the walls follow the outer edges.
+    loops = []
+    sizes = []
+    if len(triangles):
+        loops.append(triangles.ravel())
+        loops.append(triangles[:, ::-1].ravel() + count)
+        sizes.append(np.full(2 * len(triangles), 3, dtype=np.int32))
+    if len(poly_sizes):
+        index = np.arange(poly_offset, len(coords))
+        position = index - poly_offset - np.repeat(poly_starts, poly_sizes)
+        reverse = (np.repeat(poly_starts + poly_sizes - 1, poly_sizes)
+                   - position + poly_offset)
+        loops.append(index)
+        loops.append(reverse + count)
+        sizes.append(np.tile(poly_sizes.astype(np.int32), 2))
+    if len(walls):
+        loops.append(np.stack((walls[:, 1], walls[:, 0],
+                               walls[:, 0] + count, walls[:, 1] + count),
+                              axis=1).ravel())
+        sizes.append(np.full(len(walls), 4, dtype=np.int32))
+
+    loop_vertices = np.concatenate(loops).astype(np.int32)
+    loop_sizes = np.concatenate(sizes)
+    loop_starts = np.zeros(len(loop_sizes), dtype=np.int32)
+    np.cumsum(loop_sizes[:-1], out=loop_starts[1:])
+
+    mesh = bpy.data.meshes.new(name=f"M{name}")
+    mesh.vertices.add(len(vertices))
+    mesh.vertices.foreach_set("co", vertices.ravel())
+    mesh.loops.add(len(loop_vertices))
+    mesh.loops.foreach_set("vertex_index", loop_vertices)
+    # The size of a face follows from the start of the next one, so Blender
+    # only needs the offsets
+    mesh.polygons.add(len(loop_sizes))
+    mesh.polygons.foreach_set("loop_start", loop_starts)
+    # Faces are flat, without this Blender interpolates the normals and every
+    # edge between two faces of a layer shows up as a shading artifact
+    mesh.polygons.foreach_set("use_smooth", np.zeros(len(loop_sizes), dtype=bool))
+    mesh.update(calc_edges=True)
+
+    # Blender fills large concave faces with overlapping triangles, so those are
+    # triangulated up front. Small faces are left alone, they render correctly.
+    if (loop_sizes > NGON_LIMIT).any():
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bmesh.ops.triangulate(
+            bm, faces=[face for face in bm.faces if len(face.verts) > NGON_LIMIT])
+        bm.to_mesh(mesh)
+        bm.free()
+
+    return mesh
 
 
 def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
@@ -323,6 +427,9 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
     layer_index = layout.layer(*layer)
     for cell in top_cells:
         region.insert(cell.begin_shapes_rec(layer_index))
+
+    # Net names and other shape properties end up in the polygon list below
+    region.remove_properties()
 
     if crop_box is not None:
         x_min, y_min, x_max, y_max = crop_box
@@ -347,58 +454,24 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
         return None
 
     # Blender cannot fill a face with a hole, so KLayout triangulates those
-    # polygons. All others are kept as they are and triangulated further down.
+    # polygons. All others are used as they are.
     tri_coords, tri_faces = _triangles_to_mesh(region.with_holes(0, True).delaunay())
-    poly_coords, poly_faces = _polygons_to_mesh(region.with_holes(0, False))
+    poly_coords, poly_sizes = _polygons_to_mesh(region.with_holes(0, False))
 
     coords = np.concatenate((tri_coords, poly_coords))
     if offset is not None:
         coords = coords - np.array([round(offset[0] / dbu), round(offset[1] / dbu)])
+    tri_faces = tri_faces.astype(np.int64)
 
-    verts = np.empty((len(coords), 3), dtype=np.float64)
-    verts[:, :2] = coords * dbu
-    verts[:, 2] = z
+    if len(coords) > VERTEX_WARN_LIMIT:
+        report({'WARNING'}, f"{name}: {2 * len(coords)} vertices may slow down Blender")
 
-    faces = tri_faces.tolist()
-    faces.extend([index + len(tri_coords) for index in face] for face in poly_faces)
-
-    if len(verts) > VERTEX_WARN_LIMIT:
-        report({'WARNING'}, f"{name}: {len(verts)} vertices may slow down Blender")
-
-    # -----------------------------
-    # BUILD MESH
-    # -----------------------------
-    mesh = bpy.data.meshes.new(name=f"M{name}")
-    mesh.from_pydata(verts.tolist(), [], faces)
+    mesh = _build_mesh(name, coords, tri_faces, poly_sizes, dbu, z, height)
     if mesh.validate(verbose=False):
         print(f"⚠ Layer {name}: Removed invalid geometry")
 
     obj = bpy.data.objects.new(name=f"L{name}", object_data=mesh)
     bpy.context.collection.objects.link(obj)
-
-    # -----------------------------
-    # EXTRUDE
-    # -----------------------------
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
-
-    # Blender renders triangles and quads better than large n-gons
-    bmesh.ops.triangulate(bm, faces=bm.faces[:])
-    bmesh.ops.join_triangles(bm, faces=bm.faces[:],
-                             angle_face_threshold=math.pi / 4,
-                             angle_shape_threshold=math.pi)
-
-    extruded = bmesh.ops.extrude_face_region(bm, geom=bm.faces[:])
-    bmesh.ops.translate(
-        bm,
-        verts=[v for v in extruded['geom'] if isinstance(v, bmesh.types.BMVert)],
-        vec=(0, 0, height),
-    )
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-
-    bm.to_mesh(mesh)
-    bm.free()
-    mesh.update()
 
     # Apply material
     mat = create_material(name if mat_name is None else mat_name, color)
@@ -407,8 +480,8 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
     else:
         obj.data.materials.append(mat)
 
-    print(f"✓ {name}: {polygon_count} polygons, {len(verts)} vertices")
-    report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(verts)} vertices")
+    print(f"✓ {name}: {polygon_count} polygons, {len(mesh.vertices)} vertices")
+    report({'INFO'}, f"✓ {name}: {polygon_count} polygons, {len(mesh.vertices)} vertices")
     return obj
 
 
