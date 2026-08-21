@@ -15,6 +15,7 @@ bl_info = {
 
 import math
 import os
+import bmesh
 from pathlib import Path
 import bpy
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
@@ -272,6 +273,9 @@ _POLYGON_CHARS = str.maketrans({'(': None, ')': None, ';': ','})
 # Number of vertices above which a single layer slows down Blender noticeably
 VERTEX_WARN_LIMIT = 1000000
 
+# Number of corners above which Blender fills a face with overlapping triangles
+NGON_LIMIT = 64
+
 
 def _read_coordinates(text, expected):
     """Convert KLayout's polygon string into an array of integer coordinates"""
@@ -398,6 +402,17 @@ def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
     # edge between two faces of a layer shows up as a shading artifact
     mesh.polygons.foreach_set("use_smooth", np.zeros(len(loop_sizes), dtype=bool))
     mesh.update(calc_edges=True)
+
+    # Blender fills large concave faces with overlapping triangles, so those are
+    # triangulated up front. Small faces are left alone, they render correctly.
+    if (loop_sizes > NGON_LIMIT).any():
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bmesh.ops.triangulate(
+            bm, faces=[face for face in bm.faces if len(face.verts) > NGON_LIMIT])
+        bm.to_mesh(mesh)
+        bm.free()
+
     return mesh
 
 
