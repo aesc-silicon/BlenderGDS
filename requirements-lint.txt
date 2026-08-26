@@ -1,2 +1,4 @@
 yamllint
 jsonschema
+flake8
+pylint
