@@ -1,7 +1,10 @@
 # SPDX-FileCopyrightText: 2025 aesc silicon
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+"""Blender add-on importing GDSII layouts as extruded layers of a PDK stack."""
 
+# The add-on info has to be readable before the imports below are available
+# pylint: disable=wrong-import-position
 bl_info = {
     "name": "GDSII Importer",
     "author": "aesc silicon",
@@ -14,15 +17,16 @@ bl_info = {
 }
 
 import math
-import os
-import bmesh
+import traceback
 from pathlib import Path
+
+import bmesh
 import bpy
+import numpy as np
+import yaml
 from bpy.props import StringProperty, BoolProperty, FloatProperty, EnumProperty
 from bpy_extras.io_utils import ImportHelper
-import numpy as np
-import klayout.db as db
-import yaml
+from klayout import db
 
 
 # ============================================================================
@@ -63,8 +67,6 @@ def _sort_pdk_configs(pdks, order):
 
 def load_pdk_configs(configs_dir=CONFIGS_DIR):
     """Read all PDK configs from configs_dir and cache them"""
-    global _pdk_configs
-
     pdks = {}
     order = []
     for config_path in sorted(configs_dir.iterdir()):
@@ -96,7 +98,8 @@ def load_pdk_configs(configs_dir=CONFIGS_DIR):
             'def_color': metadata.get('def_color', ''),
         }
 
-    _pdk_configs = _sort_pdk_configs(pdks, order)
+    _pdk_configs.clear()
+    _pdk_configs.update(_sort_pdk_configs(pdks, order))
     return _pdk_configs
 
 
@@ -111,6 +114,7 @@ def get_pdk_configs():
 # SCENE SETUP FUNCTIONS
 # ============================================================================
 
+# pylint: disable-next=too-many-locals,too-many-statements
 def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
     """Initialize scene with camera, light, and chip base"""
     # Determine which collection to use
@@ -135,7 +139,7 @@ def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
                 gpu_activated = True
                 print(f"✓ Cycles GPU: {backend} ({len(devices)} device(s))")
                 break
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             continue
 
     if not gpu_activated:
@@ -220,6 +224,7 @@ def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
 # MATERIAL AND MESH CREATION FUNCTIONS
 # ============================================================================
 
+
 def create_material(name, color):
     """Create a material with given color"""
     mat = bpy.data.materials.get(name)
@@ -238,11 +243,11 @@ def create_material(name, color):
     node_output.location = (400.0, 0.0)
 
     # Set color and properties
-    for key,value in color.items():
+    for key, value in color.items():
         # Try using Blender's input names
         if key in node_bsdf.inputs:
             node_bsdf.inputs[key].default_value = value
-            if key == "Base Color" and len(value)>3 and not "Alpha" in color:
+            if key == "Base Color" and len(value) > 3 and "Alpha" not in color:
                 # Copy alpha channel of "Base Color" to "Alpha" property if not explicitly set
                 node_bsdf.inputs["Alpha"].default_value = value[3]
 
@@ -250,13 +255,13 @@ def create_material(name, color):
             # Handle exceptional property
             try:
                 node_bsdf.distribution = value
-            except:
+            except TypeError:
                 print(f"Unknown Specular Type: {value}")
         elif key == "Subsurface Type":
             # Handle exceptional property
             try:
                 node_bsdf.subsurface_method = value
-            except:
+            except TypeError:
                 print(f"Unknown Subsurface Type: {value}")
         else:
             print(f"Unknown input name: {key}")
@@ -341,6 +346,7 @@ def _boundary_edges(triangles, poly_starts, poly_sizes, poly_offset, vertex_coun
     return np.concatenate(edges)
 
 
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
     """Build the extruded solid of one layer without going through bmesh
 
@@ -416,6 +422,7 @@ def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
     return mesh
 
 
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
                           mat_name=None, unit=1e-6, crop_box=None, offset=None,
                           merge=True):
@@ -489,13 +496,13 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
 # PRE-IMPORT PDK SELECTION DIALOG
 # ============================================================================
 
-def get_pdk_list(self, context):
+def get_pdk_list(self, context):  # pylint: disable=unused-argument
     """Dynamically generate PDK list based on the available configs"""
     return [(key, pdk['name'], pdk['description'])
             for key, pdk in get_pdk_configs().items()]
 
 
-def get_color_schemes(self, context):
+def get_color_schemes(self, context):  # pylint: disable=unused-argument
     """Dynamically generate color scheme list based on selected PDK"""
     pdk_configs = get_pdk_configs()
     pdk = getattr(context.scene, 'gdsii_pdk_selection', next(iter(pdk_configs), ''))
@@ -548,7 +555,8 @@ class GDSIIPreImportDialog(bpy.types.Operator):
         subtype='FILE_PATH',
     )
 
-    def invoke(self, context, event):
+    def invoke(self, context, event):  # pylint: disable=unused-argument
+        """Open the dialog"""
         # Pick up PDKs added since the last import
         load_pdk_configs()
         # Set default config path based on PDK selection
@@ -569,7 +577,8 @@ class GDSIIPreImportDialog(bpy.types.Operator):
         if default_color.exists():
             self.custom_color_path = str(default_color)
 
-    def draw(self, context):
+    def draw(self, context):  # pylint: disable=unused-argument
+        """Draw the PDK and configuration file options"""
         layout = self.layout
 
         box = layout.box()
@@ -588,7 +597,8 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             row = box.row()
             row.alert = not Path(self.custom_color_path).is_file()
             row.prop(self, "custom_color_path")
-            if not Path(self.custom_config_path).is_file() or not Path(self.custom_color_path).is_file():
+            if (not Path(self.custom_config_path).is_file()
+                    or not Path(self.custom_color_path).is_file()):
                 box.label(text="Fix highlighted paths before importing", icon='ERROR')
         else:
             pdk_info = get_pdk_configs().get(self.pdk_selection, {})
@@ -596,6 +606,7 @@ class GDSIIPreImportDialog(bpy.types.Operator):
             box.label(text=f"Using: {config_path.name if config_path else 'N/A'}", icon='INFO')
 
     def execute(self, context):
+        """Hand the settings over to the importer and open the file browser"""
         # Store PDK settings in scene for the importer to use
         context.scene.gdsii_pdk_selection = self.pdk_selection
         context.scene.gdsii_use_custom_config = self.use_custom_config
@@ -760,8 +771,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
         box.label(text=pdk_name)
 
     def execute(self, context):
+        """Import the selected file"""
         return self.import_gdsii(context, self.filepath)
 
+    # pylint: disable-next=too-many-locals,too-many-branches,too-many-statements
     def import_gdsii(self, context, filepath):
         """Main import function"""
         try:
@@ -817,7 +830,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 # Cropped polygons are shifted so the lower-left sits at the origin.
                 bbox_min = (0.0, 0.0)
                 bbox_max = (self.crop_width, self.crop_height)
-                print(f"Cropping to region: X={self.crop_x}, Y={self.crop_y}, W={self.crop_width}, H={self.crop_height}")
+                print(f"Cropping to region: X={self.crop_x}, Y={self.crop_y}, "
+                      f"W={self.crop_width}, H={self.crop_height}")
             else:
                 # Determine chip dimensions for scene setup
                 bbox = db.Box()
@@ -890,9 +904,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             print(f"✓ Import complete! {imported_count} layers imported.")
             return {'FINISHED'}
 
-        except Exception as e:
-            self.report({'ERROR'}, f"Import failed: {str(e)}")
-            import traceback
+        except Exception as error:  # pylint: disable=broad-exception-caught
+            self.report({'ERROR'}, f"Import failed: {error}")
             traceback.print_exc()
             return {'CANCELLED'}
 
@@ -901,9 +914,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 # MENU INTEGRATION
 # ============================================================================
 
-def menu_func_import(self, context):
-    self.layout.operator(GDSIIPreImportDialog.bl_idname, 
-                        text="GDSII (.gds)")
+def menu_func_import(self, context):  # pylint: disable=unused-argument
+    """Add the importer to Blender's import menu"""
+    self.layout.operator(GDSIIPreImportDialog.bl_idname,
+                         text="GDSII (.gds)")
 
 
 # ============================================================================
@@ -912,24 +926,30 @@ def menu_func_import(self, context):
 
 # Properties to store PDK settings in scene
 def register_properties():
+    """Add the scene properties the dialog and the importer share"""
     bpy.types.Scene.gdsii_pdk_selection = StringProperty(
         default=next(iter(get_pdk_configs()), ''))
     bpy.types.Scene.gdsii_use_custom_config = BoolProperty(default=False)
     bpy.types.Scene.gdsii_custom_config_path = StringProperty(default='')
     bpy.types.Scene.gdsii_custom_color_path = StringProperty(default='')
 
+
 def unregister_properties():
+    """Remove the scene properties again"""
     del bpy.types.Scene.gdsii_pdk_selection
     del bpy.types.Scene.gdsii_use_custom_config
     del bpy.types.Scene.gdsii_custom_config_path
     del bpy.types.Scene.gdsii_custom_color_path
+
 
 classes = (
     GDSIIPreImportDialog,
     ImportGDSII,
 )
 
+
 def register():
+    """Register the add-on with Blender"""
     register_properties()
 
     for cls in classes:
@@ -937,13 +957,16 @@ def register():
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
+
 def unregister():
+    """Unregister the add-on again"""
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
 
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     unregister_properties()
+
 
 if __name__ == "__main__":
     register()

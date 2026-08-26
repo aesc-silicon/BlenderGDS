@@ -42,6 +42,7 @@ PLATFORMS = [
     "macosx_11_0_arm64",        # macOS Apple Silicon
 ]
 
+
 def get_version() -> tuple[str, bool]:
     """Return (version, is_dirty) derived from the latest git tag.
 
@@ -64,7 +65,8 @@ def get_version() -> tuple[str, bool]:
         print(f"Warning: unexpected git describe output {out!r} — falling back to 0.0.0")
         return "0.0.0", True
 
-    major, minor, patch, distance = int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4))
+    major, minor, patch, distance = (int(m.group(1)), int(m.group(2)),
+                                     int(m.group(3)), int(m.group(4)))
     dirty = distance > 0
     if dirty:
         patch += 1
@@ -99,8 +101,8 @@ wheels = [
 """
 
 
-
 def download_wheels() -> None:
+    """Download the wheels of all dependencies for every supported platform."""
     if WHEELS_DIR.exists():
         shutil.rmtree(WHEELS_DIR)
     WHEELS_DIR.mkdir()
@@ -121,7 +123,8 @@ def download_wheels() -> None:
                     check=True,
                 )
             except subprocess.CalledProcessError:
-                print(f"  Warning: some packages could not be downloaded for {platform} (Python {python_version})")
+                print(f"  Warning: some packages could not be downloaded for "
+                      f"{platform} (Python {python_version})")
 
     # Remove wheels for packages already provided by Blender.
     for pkg in BLENDER_PROVIDED:
@@ -131,6 +134,7 @@ def download_wheels() -> None:
 
 
 def write_manifest(version: str) -> None:
+    """Write the Blender manifest listing the downloaded wheels."""
     wheels = sorted(WHEELS_DIR.glob("*.whl"))
     if not wheels:
         sys.exit("No wheels found in import_gdsii/wheels/ — run without --skip-download first.")
@@ -144,6 +148,7 @@ def write_manifest(version: str) -> None:
 
 
 def build(blender_exe: str, version: str, dirty: bool) -> None:
+    """Package the add-on into one zip per platform."""
     print(f"\nBuilding extension with: {blender_exe}")
     subprocess.run(
         [
@@ -171,7 +176,9 @@ def build(blender_exe: str, version: str, dirty: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    """Build the extension as described by the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--blender",
         default=shutil.which("blender") or "blender",
@@ -186,7 +193,8 @@ def main() -> None:
 
     version, dirty = get_version()
     if dirty:
-        print(f"Warning: dirty build — patch bumped to {version}, output zips will be marked -dirty")
+        print(f"Warning: dirty build — patch bumped to {version}, "
+              "output zips will be marked -dirty")
     else:
         print(f"Building release {version}")
 
@@ -197,10 +205,13 @@ def main() -> None:
     if WHEELS_DIR.exists():
         shutil.rmtree(WHEELS_DIR)
     MANIFEST_PATH.write_text(
-        MANIFEST_TEMPLATE.format(version=version, wheel_entries="  # Populated by build_extension.py — do not edit by hand."),
+        MANIFEST_TEMPLATE.format(
+            version=version,
+            wheel_entries="  # Populated by build_extension.py — do not edit by hand."),
         encoding="utf-8",
     )
-    print("\nDone. Install the .zip via Blender > Preferences > Get Extensions > Install from Disk.")
+    print("\nDone. Install the .zip via Blender > Preferences > Get Extensions > "
+          "Install from Disk.")
 
 
 if __name__ == "__main__":
