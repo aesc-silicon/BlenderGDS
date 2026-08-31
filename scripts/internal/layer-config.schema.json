@@ -48,6 +48,30 @@
           "type": "string",
           "enum": ["filler"],
           "description": "Purpose of this layer"
+        },
+        "cut_by": {
+          "type": "array",
+          "description": "Layers subtracted from this layer before it is extruded",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wrap_around": {
+          "type": "object",
+          "description": "Wrap this layer around a reference layer, e.g. a FinFET gate around its fins",
+          "required": ["layer"],
+          "properties": {
+            "layer": {
+              "type": "string",
+              "description": "Reference layer this layer wraps around"
+            },
+            "z_extend": {
+              "type": "number",
+              "description": "Distance the walls reach below the reference layer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
