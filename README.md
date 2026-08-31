@@ -133,6 +133,28 @@ Each layer requires:
 * `z`: Z-position in micrometers
 * `height`: Layer thickness in micrometers
 
+A layer may also carry:
+
+* `cut_by`: List of layers subtracted from this layer before it is extruded,
+  for example a gate cut removing part of a gate
+* `wrap_around`: Wraps this layer around a reference layer instead of extruding
+  it flat, for example a FinFET gate around its fins. `layer` names the
+  reference layer and the optional `z_extend` says how far the walls reach
+  below it:
+
+```yaml
+Gate:
+  index: 7
+  type: 0
+  z: 0.03
+  height: 0.056
+  cut_by:
+    - GateCut
+  wrap_around:
+    layer: Fin
+    z_extend: 0.01
+```
+
 #### Parameters
 
 - `pdk` - Process Design Kit specification (e.g., `ihp-sg13g2`)

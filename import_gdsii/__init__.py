@@ -5,6 +5,8 @@
 
 # The add-on info has to be readable before the imports below are available
 # pylint: disable=wrong-import-position
+# Blender loads the add-on as this one module, so it grows past pylint's limit
+# pylint: disable=too-many-lines
 bl_info = {
     "name": "GDSII Importer",
     "author": "aesc silicon",
@@ -347,11 +349,12 @@ def _boundary_edges(triangles, poly_starts, poly_sizes, poly_offset, vertex_coun
 
 
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
-def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
-    """Build the extruded solid of one layer without going through bmesh
+def _slab_geometry(coords, triangles, poly_sizes, dbu, z, height, vertex_offset):
+    """Build the vertices and face loops of one extruded slab
 
-    The polygons are the bottom of the solid, a copy shifted by the layer
-    height is the top and every outer edge is closed with a wall.
+    The polygons are the bottom of the slab, a copy shifted by the slab
+    height is the top and every outer edge is closed with a wall. Loop
+    indices are shifted by vertex_offset so slabs can be concatenated.
     """
     count = len(coords)
     points = coords * dbu
@@ -390,8 +393,35 @@ def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
                               axis=1).ravel())
         sizes.append(np.full(len(walls), 4, dtype=np.int32))
 
-    loop_vertices = np.concatenate(loops).astype(np.int32)
-    loop_sizes = np.concatenate(sizes)
+    if not loops:
+        return vertices, np.empty(0, dtype=np.int64), np.empty(0, dtype=np.int32)
+    return (vertices, np.concatenate(loops).astype(np.int64) + vertex_offset,
+            np.concatenate(sizes))
+
+
+# pylint: disable-next=too-many-locals
+def _build_mesh(name, slabs, dbu):
+    """Build the extruded solid of one layer without going through bmesh
+
+    Layers are usually a single slab. A layer that wraps around a reference
+    layer contributes a second slab covering a different z range, which the
+    loops below index into one shared vertex array.
+    """
+    all_vertices = []
+    all_loops = []
+    all_sizes = []
+    vertex_offset = 0
+    for coords, triangles, poly_sizes, z, height in slabs:
+        vertices, loop_vertices, loop_sizes = _slab_geometry(
+            coords, triangles, poly_sizes, dbu, z, height, vertex_offset)
+        all_vertices.append(vertices)
+        all_loops.append(loop_vertices)
+        all_sizes.append(loop_sizes)
+        vertex_offset += len(vertices)
+
+    vertices = np.concatenate(all_vertices)
+    loop_vertices = np.concatenate(all_loops).astype(np.int32)
+    loop_sizes = np.concatenate(all_sizes)
     loop_starts = np.zeros(len(loop_sizes), dtype=np.int32)
     np.cumsum(loop_sizes[:-1], out=loop_starts[1:])
 
@@ -422,14 +452,8 @@ def _build_mesh(name, coords, triangles, poly_sizes, dbu, z, height):
     return mesh
 
 
-# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
-def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
-                          mat_name=None, unit=1e-6, crop_box=None, offset=None,
-                          merge=True):
-    """Create extruded geometry for a specific GDS layer"""
-    dbu = layout.dbu * 1e-6 / unit
-
-    # Collect the layer from all top cells, including their sub cells
+def _layer_region(layout, top_cells, layer, dbu, crop_box=None):
+    """Collect one layer from all top cells, including their sub cells"""
     region = db.Region()
     layer_index = layout.layer(*layer)
     for cell in top_cells:
@@ -446,6 +470,61 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
             math.ceil(x_max / dbu),
             math.ceil(y_max / dbu),
         ))
+    return region
+
+
+def extract_layer_region(layout, top_cells, layer, unit=1e-6, crop_box=None):
+    """Merged region of one layer, for use as a cut or wrap-around reference"""
+    dbu = layout.dbu * 1e-6 / unit
+    region = _layer_region(layout, top_cells, layer, dbu, crop_box)
+    region.merge()
+    return region
+
+
+def _region_geometry(region, dbu, offset):
+    """Convert a region into welded coordinates, triangles and polygon sizes"""
+    # Blender cannot fill a face with a hole, so KLayout triangulates those
+    # polygons. All others are used as they are.
+    tri_coords, tri_faces = _triangles_to_mesh(region.with_holes(0, True).delaunay())
+    poly_coords, poly_sizes = _polygons_to_mesh(region.with_holes(0, False))
+
+    coords = np.concatenate((tri_coords, poly_coords))
+    if offset is not None:
+        coords = coords - np.array([round(offset[0] / dbu), round(offset[1] / dbu)])
+    return coords, tri_faces.astype(np.int64), poly_sizes
+
+
+# pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
+def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
+                          mat_name=None, unit=1e-6, crop_box=None, offset=None,
+                          merge=True, cut_region=None, wrap_region=None,
+                          wrap_z_bottom=None):
+    """Create extruded geometry for a specific GDS layer
+
+    Processing order when the optional regions are supplied:
+      1. cut_region  – subtracted first (XY boolean NOT); removed areas
+                       disappear from this layer entirely (e.g. gate cuts).
+      2. wrap_region – adds a second slab so the layer wraps around a
+                       reference geometry (e.g. a gate around FinFET fins):
+
+                         z+height ┌──────────────┐  ← cap (full polygon)
+                                  │              │
+                              z   ├──┬────────┬──┤  ← gate.z (dividing line)
+                                  │  │        │  │  ← walls (layer NOT ref)
+                        fin_top   │  │  ref   │  │
+                        fin_bot   │  └────────┘  │
+                       wrap_z_bot └──┘        └──┘  ← walls continue below ref
+
+                       The reference layer fills its own slot; the two slabs
+                       together form the Ω/U cross-section.
+    """
+    dbu = layout.dbu * 1e-6 / unit
+
+    region = _layer_region(layout, top_cells, layer, dbu, crop_box)
+
+    # Gate cuts and similar layers are removed before the layer is extruded
+    if cut_region is not None:
+        region -= cut_region
 
     # Merging avoids overlapping faces, which Cycles renders as artifacts.
     # Without it the polygons have to be taken as they are in the GDS, since
@@ -460,20 +539,21 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
         print(f"⚠ Layer {name}: No geometry found")
         return None
 
-    # Blender cannot fill a face with a hole, so KLayout triangulates those
-    # polygons. All others are used as they are.
-    tri_coords, tri_faces = _triangles_to_mesh(region.with_holes(0, True).delaunay())
-    poly_coords, poly_sizes = _polygons_to_mesh(region.with_holes(0, False))
+    slabs = [(*_region_geometry(region, dbu, offset), z, height)]
 
-    coords = np.concatenate((tri_coords, poly_coords))
-    if offset is not None:
-        coords = coords - np.array([round(offset[0] / dbu), round(offset[1] / dbu)])
-    tri_faces = tri_faces.astype(np.int64)
+    # The walls run alongside the reference geometry, from wrap_z_bottom up to
+    # the layer itself, which caps them off
+    if wrap_region is not None and wrap_z_bottom is not None:
+        walls = region - wrap_region
+        if not walls.is_empty():
+            slabs.append((*_region_geometry(walls, dbu, offset),
+                          wrap_z_bottom, z - wrap_z_bottom))
 
-    if len(coords) > VERTEX_WARN_LIMIT:
-        report({'WARNING'}, f"{name}: {2 * len(coords)} vertices may slow down Blender")
+    vertex_count = sum(len(coords) for coords, _, _, _, _ in slabs)
+    if vertex_count > VERTEX_WARN_LIMIT:
+        report({'WARNING'}, f"{name}: {2 * vertex_count} vertices may slow down Blender")
 
-    mesh = _build_mesh(name, coords, tri_faces, poly_sizes, dbu, z, height)
+    mesh = _build_mesh(name, slabs, dbu)
     if mesh.validate(verbose=False):
         print(f"⚠ Layer {name}: Removed invalid geometry")
 
@@ -881,6 +961,42 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 if isinstance(layer_cfg, str):
                     mat_name = layer_cfg
                     layer_cfg = color_file.get('materials', {}).get(layer_cfg, {})
+
+                # Resolve cut_by: collect the regions to subtract from this layer
+                cut_region = None
+                for cut_name in data.get('cut_by', []):
+                    cut_data = layerstack.get(cut_name)
+                    if cut_data is None:
+                        print(f"⚠ cut_by: layer '{cut_name}' not found in stack, "
+                              f"skipping cut for {layer_name}")
+                        continue
+                    cut_layer = (cut_data['index'], cut_data['type'])
+                    region = extract_layer_region(gds_layout, top_cells, cut_layer,
+                                                  self.unit_scale, crop_box)
+                    if cut_region is None:
+                        cut_region = region
+                    else:
+                        cut_region += region
+
+                # Resolve wrap_around: extract the reference layer so the gate
+                # (or any other layer) can be split at the reference boundaries
+                wrap_region = None
+                wrap_z_bottom = None
+                wrap = data.get('wrap_around')
+                if wrap:
+                    target_name = wrap['layer']
+                    target_data = layerstack.get(target_name)
+                    if target_data is None:
+                        print(f"⚠ wrap_around: layer '{target_name}' not found in stack, "
+                              f"skipping wrap for {layer_name}")
+                    else:
+                        target_layer = (target_data['index'], target_data['type'])
+                        wrap_region = extract_layer_region(gds_layout, top_cells,
+                                                           target_layer,
+                                                           self.unit_scale, crop_box)
+                        z_extend = wrap.get('z_extend', 0.0) * self.z_scale
+                        wrap_z_bottom = target_data['z'] * self.z_scale - z_extend
+
                 obj = create_extruded_layer(
                     self.report,
                     gds_layout,
@@ -895,6 +1011,9 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     crop_box=crop_box,
                     offset=crop_offset,
                     merge=self.merge_layers,
+                    cut_region=cut_region,
+                    wrap_region=wrap_region,
+                    wrap_z_bottom=wrap_z_bottom,
                 )
 
                 if obj is not None:
