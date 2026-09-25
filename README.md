@@ -140,7 +140,9 @@ A layer may also carry:
 * `wrap_around`: Wraps this layer around a reference layer instead of extruding
   it flat, for example a FinFET gate around its fins. `layer` names the
   reference layer and the optional `z_extend` says how far the walls reach
-  below it:
+  below it. The reference layer must lie below this layer's `z`. Its `z` minus
+  `z_extend` must be below this layer's `z`; otherwise the wall slab is skipped
+  with a warning:
 
 ```yaml
 Gate:
