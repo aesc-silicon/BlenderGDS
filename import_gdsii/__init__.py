@@ -544,10 +544,14 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
     # The walls run alongside the reference geometry, from wrap_z_bottom up to
     # the layer itself, which caps them off
     if wrap_region is not None and wrap_z_bottom is not None:
-        walls = region - wrap_region
-        if not walls.is_empty():
-            slabs.append((*_region_geometry(walls, dbu, offset),
-                          wrap_z_bottom, z - wrap_z_bottom))
+        if wrap_z_bottom >= z:
+            report({'WARNING'}, f"{name}: wrap_around bottom must be below layer z; "
+                   "skipping wall slab")
+        else:
+            walls = region - wrap_region
+            if not walls.is_empty():
+                slabs.append((*_region_geometry(walls, dbu, offset),
+                              wrap_z_bottom, z - wrap_z_bottom))
 
     vertex_count = sum(len(coords) for coords, _, _, _, _ in slabs)
     if vertex_count > VERTEX_WARN_LIMIT:
