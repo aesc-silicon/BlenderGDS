@@ -952,6 +952,14 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
             print(f"Layer stack config: {yamlfile}")
 
             # Import each layer from the stack
+            reference_regions = {}
+
+            def reference_region(layer):
+                if layer not in reference_regions:
+                    reference_regions[layer] = extract_layer_region(
+                        gds_layout, top_cells, layer, self.unit_scale, crop_box)
+                return reference_regions[layer]
+
             imported_count = 0
             for layer_name, data in layerstack.items():
                 z = data['z'] * self.z_scale
@@ -975,12 +983,11 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                               f"skipping cut for {layer_name}")
                         continue
                     cut_layer = (cut_data['index'], cut_data['type'])
-                    region = extract_layer_region(gds_layout, top_cells, cut_layer,
-                                                  self.unit_scale, crop_box)
+                    region = reference_region(cut_layer)
                     if cut_region is None:
-                        cut_region = region
-                    else:
-                        cut_region += region
+                        # Keep the cached reference separate from the mutable cut union.
+                        cut_region = db.Region()
+                    cut_region += region
 
                 # Resolve wrap_around: extract the reference layer so the gate
                 # (or any other layer) can be split at the reference boundaries
@@ -995,9 +1002,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                               f"skipping wrap for {layer_name}")
                     else:
                         target_layer = (target_data['index'], target_data['type'])
-                        wrap_region = extract_layer_region(gds_layout, top_cells,
-                                                           target_layer,
-                                                           self.unit_scale, crop_box)
+                        wrap_region = reference_region(target_layer)
                         z_extend = wrap.get('z_extend', 0.0) * self.z_scale
                         wrap_z_bottom = target_data['z'] * self.z_scale - z_extend
 
