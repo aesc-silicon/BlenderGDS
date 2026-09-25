@@ -43,13 +43,13 @@ Metal1:
   index: 8
   type: 0
   z: 0.640
-  height: 0.40
+  height: 0.42
 Metal1Filler:
   index: 8
   type: 22
   purpose: filler
   z: 0.640
-  height: 0.40
+  height: 0.42
 Via1:
   index: 19
   type: 0
