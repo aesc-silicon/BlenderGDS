@@ -11,17 +11,22 @@ Comp:
   index: 22
   type: 0
   z: -0.3  # Estimated value
-  height: 0.25
+  height: 0.3
 Nwell:
   index: 21
   type: 0
   z: -0.3  # Estimated value
-  height: 0.20
+  height: 0.3
+  cut_by:
+    - Comp
+    - Poly2
 Poly2:
   index: 30
   type: 0
-  z: -0.2
+  z: 0.0
   height: 0.2
+  wrap_around:
+    layer: Comp
 Contact:
   index: 33
   type: 0

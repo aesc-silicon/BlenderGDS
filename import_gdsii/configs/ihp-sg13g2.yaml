@@ -10,30 +10,37 @@ pdk_config:
 Activ:
   index: 1
   type: 0
-  z: -0.3995
+  z: -0.4
   height: 0.40
 ActivFiller:
   index: 1
   type: 22
   purpose: filler
-  z: -0.3995
+  z: -0.4
   height: 0.40
 GatPoly:
   index: 5
   type: 0
-  z: -0.399
-  height: 0.40
+  z: 0.0
+  height: 0.16
+  wrap_around:
+    layer: Activ
 GatPolyFiller:
   index: 5
   type: 22
   purpose: filler
-  z: -0.399
-  height: 0.40
+  z: -0.4
+  height: 0.56
 NWell:
   index: 31
   type: 0
   z: -0.4
   height: 0.40
+  cut_by:
+    - Activ
+    - ActivFiller
+    - GatPoly
+    - GatPolyFiller
 Cont:
   index: 6
   type: 0
