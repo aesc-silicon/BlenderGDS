@@ -30,11 +30,22 @@ for process in pdks.glob('*yaml'):
 
     validate(pdk_file, pdk_schema)
     pdk_layers = set(pdk_file.keys()) - {"pdk_config"}
+    for layer_name in pdk_layers:
+        layer = pdk_file[layer_name]
+        wrap = layer.get('wrap_around', {})
+        references = layer.get('cut_by', []) + wrap.get('layers', [])
+        if 'layer' in wrap:
+            references = references + [wrap['layer']]
+        assert set(references) <= pdk_layers, \
+            f'{process.stem}/{layer_name}: unknown layer references {set(references) - pdk_layers}'
+        assert layer_name not in references, \
+            f'{process.stem}/{layer_name}: cannot reference itself'
 
     for color in (pdks / f"colors/{process.stem}").glob('*yaml'):
         print(f"  Found color schema: {color.stem}")
 
         color_file = yaml.safe_load(color.read_text(encoding='utf-8'))
+        validate(color_file, color_schema)
 
         color_layers = set(color_file['layers'].keys())
         assert pdk_layers == color_layers, \

@@ -116,8 +116,8 @@ def get_pdk_configs():
 # SCENE SETUP FUNCTIONS
 # ============================================================================
 
-# pylint: disable-next=too-many-locals,too-many-statements
-def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
+# pylint: disable-next=too-many-locals,too-many-statements,too-many-arguments
+def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None, *, base_z=-1):
     """Initialize scene with camera, light, and chip base"""
     # Determine which collection to use
     target_collection = collection if collection is not None else bpy.context.collection
@@ -200,10 +200,10 @@ def setup_chip_scene(x_min, y_min, x_max, y_max, collection=None):
     cx = (x_min + x_max) / 2
     cy = (y_min + y_max) / 2
     extent = 20000  # 20mm in micrometers
-    verts = [(cx - extent, cy - extent, -1),
-             (cx - extent, cy + extent, -1),
-             (cx + extent, cy + extent, -1),
-             (cx + extent, cy - extent, -1)]
+    verts = [(cx - extent, cy - extent, base_z),
+             (cx - extent, cy + extent, base_z),
+             (cx + extent, cy + extent, base_z),
+             (cx + extent, cy - extent, base_z)]
     faces = [(0, 1, 2, 3)]
     mesh.from_pydata(verts, [], faces)
     mesh.update()
@@ -494,11 +494,36 @@ def _region_geometry(region, dbu, offset):
     return coords, tri_faces.astype(np.int64), poly_sizes
 
 
+def _gaa_slabs(region, z, height, references):
+    """Split a gate envelope around nanosheet volumes, retaining the gaps.
+
+    References are (region, bottom, top) tuples. Only their intersection with
+    the gate envelope is removed; missing XY geometry leaves a solid gate.
+    """
+    top = z + height
+    references = [(shape, max(z, bottom), min(top, end))
+                  for shape, bottom, end in references
+                  if not shape.is_empty() and bottom < top and end > z and end > bottom]
+    boundaries = {level for _, bottom, end in references for level in (bottom, end)}
+    levels = sorted({z, top} | boundaries)
+    slabs = []
+    for bottom, end in zip(levels, levels[1:]):
+        if end <= bottom:
+            continue
+        section = region.dup()
+        for shape, ref_bottom, ref_top in references:
+            if ref_bottom < end and ref_top > bottom:
+                section -= shape
+        if not section.is_empty():
+            slabs.append((section, bottom, end - bottom))
+    return slabs
+
+
 # pylint: disable-next=too-many-arguments,too-many-positional-arguments,too-many-locals
 def create_extruded_layer(report, layout, top_cells, z, height, layer, name, color,
                           mat_name=None, unit=1e-6, crop_box=None, offset=None,
                           merge=True, cut_region=None, wrap_region=None,
-                          wrap_z_bottom=None):
+                          wrap_z_bottom=None, wrap_volumes=None):
     """Create extruded geometry for a specific GDS layer
 
     Processing order when the optional regions are supplied:
@@ -517,7 +542,11 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
 
                        The reference layer fills its own slot; the two slabs
                        together form the Ω/U cross-section.
+
+    wrap_volumes instead removes nanosheet volumes from the full z/height
+    envelope, retaining gate material below, between and above the sheets.
     """
+    # pylint: disable=too-many-branches
     dbu = layout.dbu * 1e-6 / unit
 
     region = _layer_region(layout, top_cells, layer, dbu, crop_box)
@@ -540,6 +569,11 @@ def create_extruded_layer(report, layout, top_cells, z, height, layer, name, col
         return None
 
     slabs = [(*_region_geometry(region, dbu, offset), z, height)]
+    if wrap_volumes is not None:
+        slabs = [(*_region_geometry(section, dbu, offset), bottom, thickness)
+                 for section, bottom, thickness in _gaa_slabs(region, z, height, wrap_volumes)]
+        if not slabs:
+            return None
 
     # The walls run alongside the reference geometry, from wrap_z_bottom up to
     # the layer itself, which caps them off
@@ -936,7 +970,10 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
 
             # Setup scene if requested
             if self.setup_scene:
-                setup_chip_scene(bbox_min[0], bbox_min[1], bbox_max[0], bbox_max[1], collection)
+                stack_bottom = min(data['z'] * self.z_scale for data in layerstack.values())
+                base_z = min(-1.0, stack_bottom - 1.0)
+                setup_chip_scene(bbox_min[0], bbox_min[1], bbox_max[0], bbox_max[1],
+                                 collection, base_z=base_z)
 
             if use_custom:
                 colorfile = Path(custom_color_path)
@@ -965,6 +1002,8 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 z = data['z'] * self.z_scale
                 height = data['height'] * self.z_scale
                 layer_index = (data['index'], data['type'])
+                if data.get('purpose') == 'mask':
+                    continue
                 if data.get('purpose', 'drawing') == 'filler' and not self.add_fill:
                     continue
 
@@ -993,8 +1032,17 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                 # (or any other layer) can be split at the reference boundaries
                 wrap_region = None
                 wrap_z_bottom = None
+                wrap_volumes = None
                 wrap = data.get('wrap_around')
-                if wrap:
+                if wrap and 'layers' in wrap:
+                    wrap_volumes = []
+                    for target_name in wrap['layers']:
+                        target_data = layerstack[target_name]
+                        target_layer = (target_data['index'], target_data['type'])
+                        bottom = target_data['z'] * self.z_scale
+                        top = bottom + target_data['height'] * self.z_scale
+                        wrap_volumes.append((reference_region(target_layer), bottom, top))
+                elif wrap:
                     target_name = wrap['layer']
                     target_data = layerstack.get(target_name)
                     if target_data is None:
@@ -1023,6 +1071,7 @@ class ImportGDSII(bpy.types.Operator, ImportHelper):
                     cut_region=cut_region,
                     wrap_region=wrap_region,
                     wrap_z_bottom=wrap_z_bottom,
+                    wrap_volumes=wrap_volumes,
                 )
 
                 if obj is not None:

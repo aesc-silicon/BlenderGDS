@@ -28,6 +28,8 @@ BlenderGDS enables semiconductor layout visualization by importing GDSII files i
 * IHP Open PDK (SG13G2 & CMOS5L)
 * SkyWater SKY130 PDK
 * GlobalFoundries GF180MCU PDK
+* Georgia Tech GT3 (3 nm GAAFET, buried power rails)
+* Georgia Tech GT2N (2 nm nanosheet GAAFET, backside power delivery)
 * SiEPIC EBeam PDK (silicon photonics)
 * Luxtelligence LNOI400 PDK (thin-film lithium niobate photonics)
 
@@ -64,6 +66,10 @@ The extension is now active. No restart needed.
 
    This downloads wheels for all supported platforms (Linux, Windows, macOS) and produces `import_gdsii-*.zip` in the repo root.
 
+   You can also run `uv run python scripts/build_extension.py`. If the active
+   Python environment has no `pip`, the script uses `uv tool run` to provide
+   an isolated pip downloader automatically.
+
    If `blender` is not on your `PATH`, pass it explicitly:
 
    ```bash
@@ -81,7 +87,7 @@ To update to a newer version, install the new `.zip` via **Get Extensions → In
 ### Basic Import
 
 1. Go to **File → Import → GDSII (.gds)**
-2. Select your desired PDK (currently IHP Open PDK SG13G2)
+2. Select your desired PDK and color scheme
 3. Browse and select your GDSII file
 4. Configure import options in the sidebar
 5. Click **Import GDSII**
@@ -157,11 +163,56 @@ Gate:
     z_extend: 0.01
 ```
 
+For stacked GAA channels, use `wrap_around.layers` instead of `layer` and
+`z_extend`. Here `z` and `height` describe the **entire gate envelope**.
+Each referenced layer's XY footprint is removed only over its own Z interval,
+leaving gate material below, between, and above the nanosheets:
+
+```yaml
+GATE:
+  index: 3
+  type: 0
+  z: 0.010
+  height: 0.065
+  cut_by: [GCUT]
+  wrap_around:
+    layers: [ACT1, ACT2, ACT3]
+```
+
+Define each nanosheet as a separate layer entry with the same ACT GDS pair and
+its own `z` and `height`. References use the raw GDS footprint, before any cuts
+or wrapping configured on the reference itself. A layer with `purpose: mask`
+is available to `cut_by` and `wrap_around` but never creates a visible mesh.
+This is useful for gate cuts, implant masks, and cell boundaries.
+
 #### Parameters
 
 - `pdk` - Process Design Kit specification (e.g., `ihp-sg13g2`)
 - `output_file` - Path for the merged output GDS file
 - `input.gds` - Input GDS file to process
+
+### GT3 and GT2N visualization
+
+Both presets use the official drawing layer maps and the frontside gate/metal
+elevations in the PDK's QRC ICT files. Vias span the gaps between conductors.
+GT2N includes BV0–BV4, BM1–BM4, and BRDL from the published backside layer map,
+with vertical spacing derived from the ITF stack. The scene base is placed
+below the stack so it does not obscure backside wiring.
+
+The front end is a schematic reconstruction: three 5 nm sheets with 10 nm gaps
+reuse the ACT footprint at Z = 0.020, 0.035, and 0.050 µm. Their placement,
+contact alignment, and buried-rail origin are visualization assumptions;
+oxide, spacers, and source/drain epitaxy are not reconstructed. Mask, label,
+and pin shapes are not displayed as physical solids. These presets are not
+fabrication cross-sections, and geometry is generated only for layers present
+in the imported GDS.
+
+Sources (the exact revisions are recorded in each preset):
+
+* [GT3](https://github.com/azadnaeemi/GT3):
+  `cdslib/gt3_techfile.layermap`, `qrc/GT3.ict`, `nxtgrd/GT3.itf`
+* [GT2N](https://github.com/azadnaeemi/GT2N):
+  `techlib/gt2_techfile.layermap`, `qrc/GT2.ict`, `nxtgrd/GT2.itf`
 
 ### PDK Configuration
 
@@ -254,6 +305,17 @@ Layers not listed in the schema are rendered with a default grey material.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues on the [GitHub repository](https://github.com/aesc-silicon/BlenderGDS).
+
+Run `tox` for lint and configuration validation. GAA geometry regressions run
+inside Blender with `klayout`, `numpy`, and `PyYAML` available to its Python:
+
+```bash
+blender --background --factory-startup -noaudio --python-exit-code 1 \
+  --python scripts/internal/test_gaa.py
+```
+
+The tests generate their own GDS fixtures, including backside layers, and do
+not require downloading either PDK.
 
 ## License
 

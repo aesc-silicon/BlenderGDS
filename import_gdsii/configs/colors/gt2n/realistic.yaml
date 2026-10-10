@@ -1,0 +1,243 @@
+# SPDX-FileCopyrightText: 2026 BlenderGDS contributors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+name: Realistic
+description: GT2N realistic color scheme
+layers:
+  NWELL:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  DUMMY:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  GCUT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  NSEL:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  PSEL:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  ELVT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  ULVT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  SVT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  HVT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  SRAMVT:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  prBoundary:
+    Base Color: [0.3, 0.3, 0.3, 0.0]
+    Metallic: 0.8
+    Roughness: 0.3
+  ACT1:
+    Base Color: [0.32, 0.38, 0.46, 1]
+    Metallic: 0.0
+    Roughness: 0.3
+  ACT2:
+    Base Color: [0.32, 0.38, 0.46, 1]
+    Metallic: 0.0
+    Roughness: 0.3
+  ACT3:
+    Base Color: [0.32, 0.38, 0.46, 1]
+    Metallic: 0.0
+    Roughness: 0.3
+  GATE:
+    Base Color: [0.5, 0.51, 0.54, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BPR:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  VBPR:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  SDCON:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  VSD:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  VG:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M0:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V0:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M1:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V1:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M2:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V2:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M3:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V3:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M4:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V4:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M5:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V5:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M6:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V6:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M7:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V7:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M8:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V8:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M9:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V9:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M10:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V10:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M11:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V11:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M12:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V12:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  M13:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  V13:
+    Base Color: [0.4, 0.42, 0.45, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  RDL:
+    Base Color: [0.72, 0.48, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BV0:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BM1:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BV1:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BM2:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BV2:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BM3:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BV3:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BM4:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BV4:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3
+  BRDL:
+    Base Color: [0.67, 0.45, 0.27, 1]
+    Metallic: 0.8
+    Roughness: 0.3

@@ -1,0 +1,288 @@
+# SPDX-FileCopyrightText: 2026 BlenderGDS contributors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Georgia Tech GT3: drawing datatypes only, dimensions in micrometers.
+# Source: https://github.com/azadnaeemi/GT3
+# Revision: 65050ce0125f2f25eb1e9a0940e22b7c3bc5eb5c
+# Layer map: cdslib/gt3_techfile.layermap
+# Frontside gate/metal elevations: qrc/GT3.ict
+# Contact/BPR thicknesses: nxtgrd/GT3.itf
+#
+# Visualization assumptions: z=0 is the top of the buried oxide. ACT is
+# expanded to three 5 nm sheets with 10 nm gaps, starting at z=0.020.
+# SDCON ends at the gate top; VSD/VG bridge to M0. BPR sits below 23 nm BOX.
+# Wells, selection/threshold masks and cuts are references, not physical solids.
+# These are schematic rectangular volumes; oxide/spacers and source/drain
+# epitaxy are not reconstructed. This is not a fabrication cross-section.
+
+pdk_config:
+  name: Georgia Tech GT3 PDK
+  description: 3 nm GAAFET with buried power rails
+  def_color: realistic
+
+NWELL:
+  index: 1
+  type: 0
+  z: 0.000
+  height: 0.000
+  purpose: mask
+
+DUMMY:
+  index: 4
+  type: 0
+  z: 0.000
+  height: 0.000
+  purpose: mask
+
+GCUT:
+  index: 5
+  type: 0
+  z: 0.000
+  height: 0.000
+  purpose: mask
+
+NSEL:
+  index: 6
+  type: 0
+  z: 0.000
+  height: 0.000
+  purpose: mask
+
+PSEL:
+  index: 7
+  type: 0
+  z: 0.000
+  height: 0.000
+  purpose: mask
+
+ACT1:
+  index: 2
+  type: 0
+  z: 0.020
+  height: 0.005
+
+ACT2:
+  index: 2
+  type: 0
+  z: 0.035
+  height: 0.005
+
+ACT3:
+  index: 2
+  type: 0
+  z: 0.050
+  height: 0.005
+
+GATE:
+  index: 3
+  type: 0
+  z: 0.010
+  height: 0.065
+  cut_by: [GCUT]
+  wrap_around:
+    layers: [ACT1, ACT2, ACT3]
+
+BPR:
+  index: 8
+  type: 0
+  z: -0.113
+  height: 0.090
+
+VBPR:
+  index: 9
+  type: 0
+  z: -0.023
+  height: 0.045
+
+SDCON:
+  index: 10
+  type: 0
+  z: 0.022
+  height: 0.053
+
+VSD:
+  index: 11
+  type: 0
+  z: 0.075
+  height: 0.023
+
+VG:
+  index: 12
+  type: 0
+  z: 0.075
+  height: 0.023
+
+M0:
+  index: 20
+  type: 0
+  z: 0.098
+  height: 0.024
+
+V0:
+  index: 22
+  type: 0
+  z: 0.122
+  height: 0.024
+
+M1:
+  index: 25
+  type: 0
+  z: 0.146
+  height: 0.028
+
+V1:
+  index: 27
+  type: 0
+  z: 0.174
+  height: 0.028
+
+M2:
+  index: 30
+  type: 0
+  z: 0.202
+  height: 0.024
+
+V2:
+  index: 32
+  type: 0
+  z: 0.226
+  height: 0.024
+
+M3:
+  index: 35
+  type: 0
+  z: 0.250
+  height: 0.028
+
+V3:
+  index: 37
+  type: 0
+  z: 0.278
+  height: 0.028
+
+M4:
+  index: 40
+  type: 0
+  z: 0.306
+  height: 0.042
+
+V4:
+  index: 42
+  type: 0
+  z: 0.348
+  height: 0.042
+
+M5:
+  index: 45
+  type: 0
+  z: 0.390
+  height: 0.042
+
+V5:
+  index: 47
+  type: 0
+  z: 0.432
+  height: 0.042
+
+M6:
+  index: 50
+  type: 0
+  z: 0.474
+  height: 0.076
+
+V6:
+  index: 52
+  type: 0
+  z: 0.550
+  height: 0.076
+
+M7:
+  index: 55
+  type: 0
+  z: 0.626
+  height: 0.076
+
+V7:
+  index: 57
+  type: 0
+  z: 0.702
+  height: 0.076
+
+M8:
+  index: 60
+  type: 0
+  z: 0.778
+  height: 0.076
+
+V8:
+  index: 62
+  type: 0
+  z: 0.854
+  height: 0.076
+
+M9:
+  index: 65
+  type: 0
+  z: 0.930
+  height: 0.076
+
+V9:
+  index: 67
+  type: 0
+  z: 1.006
+  height: 0.076
+
+M10:
+  index: 70
+  type: 0
+  z: 1.082
+  height: 0.112
+
+V10:
+  index: 72
+  type: 0
+  z: 1.194
+  height: 0.112
+
+M11:
+  index: 75
+  type: 0
+  z: 1.306
+  height: 0.112
+
+V11:
+  index: 77
+  type: 0
+  z: 1.418
+  height: 0.112
+
+M12:
+  index: 80
+  type: 0
+  z: 1.530
+  height: 0.112
+
+V12:
+  index: 82
+  type: 0
+  z: 1.642
+  height: 0.112
+
+M13:
+  index: 85
+  type: 0
+  z: 1.754
+  height: 0.112
+
+V13:
+  index: 87
+  type: 0
+  z: 1.866
+  height: 0.112
+
+RDL:
+  index: 90
+  type: 0
+  z: 1.978
+  height: 0.500
