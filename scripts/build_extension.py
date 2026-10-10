@@ -15,6 +15,7 @@ The resulting .zip can be installed in Blender via:
     Preferences > Get Extensions > Install from Disk
 """
 import argparse
+import importlib.util
 import re
 import shutil
 import subprocess
@@ -103,6 +104,15 @@ wheels = [
 
 def download_wheels() -> None:
     """Download the wheels of all dependencies for every supported platform."""
+    if importlib.util.find_spec("pip") is not None:
+        pip_command = [sys.executable, "-m", "pip"]
+    elif uv_exe := shutil.which("uv"):
+        print("pip is not installed in this Python environment; using uv's isolated pip tool.")
+        pip_command = [uv_exe, "tool", "run", "--from", "pip", "pip"]
+    else:
+        sys.exit("Downloading wheels requires pip or uv. Install pip with "
+                 f"'{sys.executable} -m ensurepip --upgrade', then retry.")
+
     if WHEELS_DIR.exists():
         shutil.rmtree(WHEELS_DIR)
     WHEELS_DIR.mkdir()
@@ -113,7 +123,7 @@ def download_wheels() -> None:
             try:
                 subprocess.run(
                     [
-                        sys.executable, "-m", "pip", "download",
+                        *pip_command, "download",
                         "--python-version", python_version,
                         "--only-binary=:all:",
                         "--platform", platform,
@@ -122,9 +132,11 @@ def download_wheels() -> None:
                     ],
                     check=True,
                 )
-            except subprocess.CalledProcessError:
-                print(f"  Warning: some packages could not be downloaded for "
-                      f"{platform} (Python {python_version})")
+            except subprocess.CalledProcessError as error:
+                raise SystemExit(
+                    f"Wheel download failed for {platform} (Python {python_version}). "
+                    "Resolve the download error above and retry without --skip-download."
+                ) from error
 
     # Remove wheels for packages already provided by Blender.
     for pkg in BLENDER_PROVIDED:
