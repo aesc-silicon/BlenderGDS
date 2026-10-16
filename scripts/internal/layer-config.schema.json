@@ -46,7 +46,7 @@
         },
         "purpose": {
           "type": "string",
-          "enum": ["filler"],
+          "enum": ["filler", "mask"],
           "description": "Purpose of this layer"
         },
         "cut_by": {
@@ -58,9 +58,21 @@
         },
         "wrap_around": {
           "type": "object",
-          "description": "Wrap this layer around a reference layer, e.g. a FinFET gate around its fins",
-          "required": ["layer"],
+          "description": "Wrap around one fin below the cap, or subtract nanosheet volumes from the full envelope",
+          "oneOf": [
+            {"required": ["layer"], "not": {"required": ["layers"]}},
+            {"required": ["layers"], "not": {"anyOf": [
+              {"required": ["layer"]}, {"required": ["z_extend"]}
+            ]}}
+          ],
           "properties": {
+            "layers": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string"},
+              "description": "Nanosheet layers removed from this layer's z/height envelope"
+            },
             "layer": {
               "type": "string",
               "description": "Reference layer this layer wraps around"
